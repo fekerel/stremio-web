@@ -8,9 +8,45 @@ const { t } = require('i18next');
 const { useCore } = require('stremio/core');
 const { useProfile, usePlatform, useToast, useBinaryState } = require('stremio/common');
 const { Button, Image, Popup } = require('stremio/components');
+const { WS_BASE_URL } = require('stremio/common/config');
+const { request } = require('stremio/common/apiClient');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
 const StreamPlaceholder = require('./StreamPlaceholder');
 const styles = require('./styles');
+
+const resolveWebSocketUrl = (path) => {
+    const baseUrl = WS_BASE_URL.endsWith('/') ? WS_BASE_URL : `${WS_BASE_URL}/`;
+    const normalizedPath = typeof path === 'string' && path.startsWith('/') ? path.slice(1) : path;
+    return new URL(normalizedPath, baseUrl).toString();
+};
+
+const normalizeDevices = (devices) => {
+    return Array.isArray(devices) ?
+        devices.filter((device) => typeof device?.id === 'string')
+        :
+        [];
+};
+
+const upsertDevice = (devices, device) => {
+    if (typeof device?.id !== 'string') {
+        return devices;
+    }
+
+    const index = devices.findIndex(({ id }) => id === device.id);
+    if (index === -1) {
+        return [...devices, device];
+    }
+
+    return devices.map((existingDevice, existingDeviceIndex) => (
+        existingDeviceIndex === index ?
+            {
+                ...existingDevice,
+                ...device
+            }
+            :
+            existingDevice
+    ));
+};
 
 const Stream = ({ className, videoId, videoReleased, addonName, name, description, thumbnail, progress, deepLinks, ...props }) => {
     const profile = useProfile();
@@ -20,6 +56,11 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
     const routeFocused = useRouteFocused();
 
     const [menuOpen, openMenu, closeMenu, toggleMenu] = useBinaryState(false);
+    const discoverySocketRef = React.useRef(null);
+    const [tvDevicesOpen, setTvDevicesOpen] = React.useState(false);
+    const [tvDevicesStatus, setTvDevicesStatus] = React.useState('idle');
+    const [tvDevices, setTvDevices] = React.useState([]);
+    const [playbackDeviceId, setPlaybackDeviceId] = React.useState(null);
 
     const popupLabelOnMouseUp = React.useCallback((event) => {
         if (!event.nativeEvent.togglePopupPrevented) {
@@ -197,6 +238,132 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
         }
     }, [streamLink]);
 
+    const closeDeviceDiscovery = React.useCallback(() => {
+        if (discoverySocketRef.current !== null) {
+            discoverySocketRef.current.close();
+            discoverySocketRef.current = null;
+        }
+
+        setTvDevicesOpen(false);
+        setTvDevicesStatus('idle');
+        setTvDevices([]);
+    }, []);
+
+    const openDeviceDiscovery = React.useCallback((event) => {
+        event.preventDefault();
+        setTvDevicesOpen(true);
+
+        if (!streamLink) {
+            toast.show({
+                type: 'error',
+                title: 'Stream source URL bulunamadi',
+                timeout: 4000,
+            });
+            return;
+        }
+
+        if (
+            discoverySocketRef.current !== null &&
+            (
+                discoverySocketRef.current.readyState === WebSocket.OPEN ||
+                discoverySocketRef.current.readyState === WebSocket.CONNECTING
+            )
+        ) {
+            return;
+        }
+
+        setTvDevicesStatus('connecting');
+        setTvDevices([]);
+
+        const socket = new WebSocket(resolveWebSocketUrl('/discovery'));
+        discoverySocketRef.current = socket;
+
+        socket.onopen = () => {
+            if (discoverySocketRef.current === socket) {
+                setTvDevicesStatus('connected');
+            }
+        };
+
+        socket.onmessage = (messageEvent) => {
+            if (discoverySocketRef.current !== socket) {
+                return;
+            }
+
+            try {
+                const message = JSON.parse(messageEvent.data);
+
+                if (message.type === 'snapshot') {
+                    setTvDevices(normalizeDevices(message.devices));
+                    setTvDevicesStatus('connected');
+                } else if (message.type === 'device.added') {
+                    setTvDevices((devices) => upsertDevice(devices, message.device));
+                    setTvDevicesStatus('connected');
+                }
+            } catch (_error) {
+                setTvDevicesStatus('error');
+                toast.show({
+                    type: 'error',
+                    title: 'TV cihaz mesaji okunamadi',
+                    timeout: 4000,
+                });
+            }
+        };
+
+        socket.onerror = () => {
+            if (discoverySocketRef.current === socket) {
+                setTvDevicesStatus('error');
+            }
+        };
+
+        socket.onclose = () => {
+            if (discoverySocketRef.current === socket) {
+                discoverySocketRef.current = null;
+                setTvDevicesStatus('disconnected');
+            }
+        };
+    }, [streamLink, toast]);
+
+    const playOnTv = React.useCallback((device) => (event) => {
+        event.preventDefault();
+
+        if (!streamLink) {
+            toast.show({
+                type: 'error',
+                title: 'Stream source URL bulunamadi',
+                timeout: 4000,
+            });
+            return;
+        }
+
+        setPlaybackDeviceId(device.id);
+        request('/playback/sessions', {
+            method: 'POST',
+            body: JSON.stringify({
+                deviceRegistryId: device.id,
+                sourceUrl: streamLink,
+            }),
+        })
+            .then(() => {
+                toast.show({
+                    type: 'success',
+                    title: `${device.friendlyName || device.ipAddress || 'TV'} uzerinde oynatiliyor`,
+                    timeout: 4000,
+                });
+                closeMenu();
+                closeDeviceDiscovery();
+            })
+            .catch((error) => {
+                toast.show({
+                    type: 'error',
+                    title: error.message || 'TV uzerinde oynatma baslatilamadi',
+                    timeout: 4000,
+                });
+            })
+            .finally(() => {
+                setPlaybackDeviceId(null);
+            });
+    }, [streamLink, closeDeviceDiscovery]);
+
     const renderThumbnailFallback = React.useCallback(() => (
         <Icon className={styles['placeholder-icon']} name={'ic_broken_link'} />
     ), []);
@@ -247,6 +414,58 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
                     <Icon className={styles['menu-icon']} name={'play'} />
                     <div className={styles['context-menu-option-label']}>{t('CTX_PLAY')}</div>
                 </Button>
+                <Button className={styles['context-menu-option-container']} title={'TV\'de oynat'} onClick={openDeviceDiscovery}>
+                    <Icon className={styles['menu-icon']} name={'tv'} />
+                    <div className={styles['context-menu-option-label']}>{'TV\'de oynat'}</div>
+                </Button>
+                {
+                    tvDevicesOpen ?
+                        <div className={styles['context-menu-devices-container']}>
+                            {
+                                tvDevices.length === 0 ?
+                                    <div className={styles['context-menu-status']}>
+                                        {
+                                            tvDevicesStatus === 'connecting' ?
+                                                'TV cihazlari araniyor...'
+                                                :
+                                                tvDevicesStatus === 'error' ?
+                                                    'TV cihazlari alinamadi'
+                                                    :
+                                                    tvDevicesStatus === 'disconnected' ?
+                                                        'TV cihaz baglantisi kapandi'
+                                                        :
+                                                        'TV cihazi bulunamadi'
+                                        }
+                                    </div>
+                                    :
+                                    tvDevices.map((device) => (
+                                        <Button
+                                            key={device.id}
+                                            className={styles['context-menu-option-container']}
+                                            title={device.friendlyName || device.ipAddress || device.id}
+                                            onClick={playOnTv(device)}
+                                        >
+                                            <Icon className={styles['menu-icon']} name={'cast'} />
+                                            <div className={styles['context-menu-device-info']}>
+                                                <div className={styles['context-menu-device-name']}>
+                                                    {device.friendlyName || device.ipAddress || device.id}
+                                                </div>
+                                                {
+                                                    device.ipAddress ?
+                                                        <div className={styles['context-menu-device-address']}>
+                                                            {playbackDeviceId === device.id ? 'Gonderiliyor...' : device.ipAddress}
+                                                        </div>
+                                                        :
+                                                        null
+                                                }
+                                            </div>
+                                        </Button>
+                                    ))
+                            }
+                        </div>
+                        :
+                        null
+                }
                 {
                     streamLink &&
                         <Button className={styles['context-menu-option-container']} title={t('CTX_COPY_STREAM_LINK')} onClick={copyStreamLink}>
@@ -270,13 +489,25 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
                 }
             </div>
         );
-    }, [copyStreamLink, onClick]);
+    }, [description, streamLink, tvDevicesOpen, tvDevices, tvDevicesStatus, playbackDeviceId, popupMenuOnPointerDown, popupMenuOnContextMenu, popupMenuOnClick, popupMenuOnKeyDown, openDeviceDiscovery, playOnTv, copyStreamLink, copyMagnetLink, copyDownloadLink, magnetLink, downloadLink]);
 
     React.useEffect(() => {
         if (!routeFocused) {
             closeMenu();
         }
     }, [routeFocused]);
+
+    React.useEffect(() => {
+        if (!menuOpen) {
+            closeDeviceDiscovery();
+        }
+    }, [menuOpen]);
+
+    React.useEffect(() => {
+        return () => {
+            closeDeviceDiscovery();
+        };
+    }, []);
 
     return (
         <Popup

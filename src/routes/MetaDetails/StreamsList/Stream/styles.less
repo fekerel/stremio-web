@@ -151,9 +151,45 @@
 					font-size: 1rem;
 					font-weight: 300;
 					color: var(--primary-foreground-color);
-                    text-transform: capitalize;
+					text-transform: capitalize;
 				}
 			}
+
+            .context-menu-devices-container {
+                border-top: 1px solid var(--overlay-color);
+                border-bottom: 1px solid var(--overlay-color);
+
+                .context-menu-status {
+                    padding: 1rem 1.5rem;
+                    font-size: 0.9rem;
+                    font-weight: 300;
+                    color: var(--color-placeholder);
+                }
+
+                .context-menu-device-info {
+                    flex: 1;
+                    min-width: 0;
+
+                    .context-menu-device-name {
+                        overflow: hidden;
+                        font-size: 1rem;
+                        font-weight: 300;
+                        color: var(--primary-foreground-color);
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+
+                    .context-menu-device-address {
+                        margin-top: 0.2rem;
+                        overflow: hidden;
+                        font-size: 0.8rem;
+                        font-weight: 300;
+                        color: var(--color-placeholder);
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                }
+            }
 		}
 	}
 }
