@@ -9,6 +9,7 @@ const { default: Icon } = require('@stremio/stremio-icons/react');
 const { useCore } = require('stremio/core');
 const { usePlatform, useBinaryState, withCoreSuspender } = require('stremio/common');
 const { AddonDetailsModal, Button, Image, MainNavBars, ModalDialog, SearchBar, SharePrompt, TextInput, MultiselectMenu } = require('stremio/components');
+const { createAddonProxy } = require('stremio/common/addonProxyApi');
 const useToast = require('stremio/common/Toast/useToast');
 const Addon = require('./Addon');
 const useInstalledAddons = require('./useInstalledAddons');
@@ -37,21 +38,22 @@ const Addons = () => {
     const [filtersModalOpen, openFiltersModal, closeFiltersModal] = useBinaryState(false);
     const [addAddonModalOpen, openAddAddonModal, closeAddAddonModal] = useBinaryState(false);
     const addAddonUrlInputRef = React.useRef(null);
-    const addAddonOnSubmit = React.useCallback(() => {
+    const addAddonOnSubmit = React.useCallback(async () => {
         if (addAddonUrlInputRef.current !== null) {
             try {
-                let url = new URL(addAddonUrlInputRef.current.value).toString();
-                setAddonDetailsTransportUrl(url);
+                const url = new URL(addAddonUrlInputRef.current.value).toString();
+                const proxyManifestUrl = await createAddonProxy(url);
+                setAddonDetailsTransportUrl(proxyManifestUrl);
             } catch (e) {
                 toast.show({
                     type: 'error',
-                    title: `Failed to parse addon url: ${addAddonUrlInputRef.current.value}`,
+                    title: `Failed to add addon: ${e.message}`,
                     timeout: 10000
                 });
-                console.error('Failed to parse addon url:', e);
+                console.error('Failed to add addon:', e);
             }
         }
-    }, [setAddonDetailsTransportUrl]);
+    }, [setAddonDetailsTransportUrl, toast]);
     const addAddonModalButtons = React.useMemo(() => {
         return [
             {
