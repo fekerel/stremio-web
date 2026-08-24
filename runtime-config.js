@@ -1,0 +1,1 @@
+window.STREMIO_WEB_CONFIG = window.STREMIO_WEB_CONFIG || {};

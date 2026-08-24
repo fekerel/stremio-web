@@ -224,7 +224,8 @@ module.exports = (env, argv) => ({
             new WorkboxPlugin.GenerateSW({
                 maximumFileSizeToCacheInBytes: 20000000,
                 clientsClaim: true,
-                skipWaiting: true
+                skipWaiting: true,
+                exclude: [/\.map$/, /^manifest.*\.js(?:on)?$/, /runtime-config\.js$/]
             }),
         new CopyWebpackPlugin({
             patterns: [
@@ -233,6 +234,7 @@ module.exports = (env, argv) => ({
                 { from: 'assets/screenshots/*.webp', to: 'screenshots/[name][ext]' },
                 { from: '.well-known', to: '.well-known' },
                 { from: 'manifest.json', to: 'manifest.json' },
+                { from: 'runtime-config.js', to: 'runtime-config.js' },
             ]
         }),
         new MiniCssExtractPlugin({
