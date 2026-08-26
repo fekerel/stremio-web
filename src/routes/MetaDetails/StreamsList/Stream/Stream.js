@@ -48,7 +48,7 @@ const upsertDevice = (devices, device) => {
     ));
 };
 
-const Stream = ({ className, videoId, videoReleased, addonName, name, description, thumbnail, progress, deepLinks, ...props }) => {
+const Stream = ({ className, type, videoId, videoReleased, addonName, name, description, thumbnail, progress, deepLinks, stream, ...props }) => {
     const profile = useProfile();
     const toast = useToast();
     const platform = usePlatform();
@@ -530,6 +530,7 @@ Stream.Placeholder = StreamPlaceholder;
 
 Stream.propTypes = {
     className: PropTypes.string,
+    type: PropTypes.string,
     videoId: PropTypes.string,
     videoReleased: PropTypes.instanceOf(Date),
     addonName: PropTypes.string,
@@ -537,6 +538,10 @@ Stream.propTypes = {
     description: PropTypes.string,
     thumbnail: PropTypes.string,
     progress: PropTypes.number,
+    stream: PropTypes.object,
+    addonTransportUrl: PropTypes.string,
+    subtitleAddonTransportUrl: PropTypes.string,
+    subtitleAddonManifest: PropTypes.object,
     deepLinks: PropTypes.shape({
         player: PropTypes.string,
         externalPlayer: PropTypes.shape({

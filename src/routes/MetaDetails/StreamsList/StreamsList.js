@@ -12,9 +12,31 @@ const { useCore } = require('stremio/core');
 const Stream = require('./Stream');
 const styles = require('./styles');
 const { usePlatform, useProfile } = require('stremio/common');
+const useInstalledAddons = require('stremio/routes/Addons/useInstalledAddons');
 const { default: SeasonEpisodePicker } = require('../EpisodePicker');
 
 const ALL_ADDONS_KEY = 'ALL';
+
+const supportsSubtitles = (addon) => {
+    return Array.isArray(addon.manifest?.resources) &&
+        addon.manifest.resources.some((resource) => (
+            resource === 'subtitles' ||
+            resource?.name === 'subtitles'
+        ));
+};
+
+const isOpenSubtitlesAddon = (addon) => {
+    const searchable = [
+        addon.manifest?.id,
+        addon.manifest?.name,
+        addon.transportUrl
+    ]
+        .filter((value) => typeof value === 'string')
+        .join(' ')
+        .toLowerCase();
+
+    return searchable.includes('opensubtitles') || searchable.includes('open subtitles');
+};
 
 const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
     const { t } = useTranslation();
@@ -24,6 +46,16 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
     const navigate = useNavigate();
     const streamsContainerRef = React.useRef(null);
     const [selectedAddon, setSelectedAddon] = React.useState(ALL_ADDONS_KEY);
+    const installedAddonsUrlParams = React.useMemo(() => ({ type }), [type]);
+    const installedAddons = useInstalledAddons(installedAddonsUrlParams);
+    const subtitleAddon = React.useMemo(() => {
+        const subtitleAddons = Array.isArray(installedAddons?.catalog) ?
+            installedAddons.catalog.filter(supportsSubtitles)
+            :
+            [];
+
+        return subtitleAddons.find(isOpenSubtitlesAddon) || subtitleAddons[0] || null;
+    }, [installedAddons?.catalog]);
     const onAddonSelected = React.useCallback((value) => {
         streamsContainerRef.current.scrollTo({ top: 0, left: 0, behavior: platform.name === 'ios' ? 'smooth' : 'instant' });
         setSelectedAddon(value);
@@ -53,6 +85,8 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                     addon: streams.addon,
                     streams: streams.content.content.map((stream) => ({
                         ...stream,
+                        addonTransportUrl: streams.addon.transportUrl,
+                        addonManifest: streams.addon.manifest,
                         onClick: () => {
                             core.transport.analytics({
                                 event: 'StreamClicked',
@@ -176,8 +210,13 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                                     {filteredStreams.map((stream, index) => (
                                         <Stream
                                             key={index}
+                                            type={type}
                                             videoId={video?.id}
                                             videoReleased={video?.released}
+                                            stream={stream}
+                                            addonTransportUrl={stream.addonTransportUrl}
+                                            subtitleAddonTransportUrl={subtitleAddon?.transportUrl}
+                                            subtitleAddonManifest={subtitleAddon?.manifest}
                                             addonName={stream.addonName}
                                             name={stream.name}
                                             description={stream.description}
