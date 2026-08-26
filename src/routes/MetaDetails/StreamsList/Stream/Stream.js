@@ -6,7 +6,7 @@ const classnames = require('classnames');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { t } = require('i18next');
 const { useCore } = require('stremio/core');
-const { useProfile, usePlatform, useToast, useBinaryState } = require('stremio/common');
+const { useProfile, usePlatform, useToast, useBinaryState, copyText } = require('stremio/common');
 const { Button, Image, Popup } = require('stremio/components');
 const { WS_BASE_URL } = require('stremio/common/config');
 const { request } = require('stremio/common/apiClient');
@@ -174,9 +174,10 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
 
     const copyMagnetLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (magnetLink) {
-            navigator.clipboard.writeText(magnetLink)
+            copyText(magnetLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
@@ -196,9 +197,10 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
 
     const copyDownloadLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (downloadLink) {
-            navigator.clipboard.writeText(downloadLink)
+            copyText(downloadLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
@@ -218,9 +220,10 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
 
     const copyStreamLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (streamLink) {
-            navigator.clipboard.writeText(streamLink)
+            copyText(streamLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
