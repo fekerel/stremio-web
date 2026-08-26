@@ -11,6 +11,7 @@ const StremoteServer = require('./StremoteServer');
 const CONSTANTS = require('./CONSTANTS');
 const { withCoreSuspender, useCoreSuspender } = require('./CoreSuspender');
 const getVisibleChildrenRange = require('./getVisibleChildrenRange');
+const copyText = require('./copyText');
 const interfaceLanguages = require('./interfaceLanguages.json');
 const languageNames = require('./languageNames.json');
 const languages = require('./languages');
@@ -60,6 +61,7 @@ module.exports = {
     withCoreSuspender,
     useCoreSuspender,
     getVisibleChildrenRange,
+    copyText,
     interfaceLanguages,
     languageNames,
     languages,

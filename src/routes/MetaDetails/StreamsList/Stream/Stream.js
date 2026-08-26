@@ -6,7 +6,7 @@ const classnames = require('classnames');
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { t } = require('i18next');
 const { useCore } = require('stremio/core');
-const { useProfile, usePlatform, useToast, useBinaryState } = require('stremio/common');
+const { useProfile, usePlatform, useToast, useBinaryState, copyText } = require('stremio/common');
 const { Button, Image, Popup } = require('stremio/components');
 const ActionButton = require('stremio/components/MetaPreview/ActionButton');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
@@ -138,9 +138,10 @@ const Stream = ({ className = '', compact = false, isEpg = false, videoId = unde
 
     const copyMagnetLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (magnetLink) {
-            navigator.clipboard.writeText(magnetLink)
+            copyText(magnetLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
@@ -160,9 +161,10 @@ const Stream = ({ className = '', compact = false, isEpg = false, videoId = unde
 
     const copyDownloadLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (downloadLink) {
-            navigator.clipboard.writeText(downloadLink)
+            copyText(downloadLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
@@ -182,9 +184,10 @@ const Stream = ({ className = '', compact = false, isEpg = false, videoId = unde
 
     const copyStreamLink = React.useCallback((event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMenu();
         if (streamLink) {
-            navigator.clipboard.writeText(streamLink)
+            copyText(streamLink)
                 .then(() => {
                     toast.show({
                         type: 'success',
