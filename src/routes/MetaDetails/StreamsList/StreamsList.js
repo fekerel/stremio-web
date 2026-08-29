@@ -10,6 +10,7 @@ const { default: Icon } = require('@stremio/stremio-icons/react');
 const { Button, Image, MultiselectMenu } = require('stremio/components');
 const { useCore } = require('stremio/core');
 const Stream = require('./Stream');
+const PlayOnTvModal = require('./PlayOnTvModal');
 const styles = require('./styles');
 const { usePlatform, useProfile } = require('stremio/common');
 const useInstalledAddons = require('stremio/routes/Addons/useInstalledAddons');
@@ -38,7 +39,7 @@ const isOpenSubtitlesAddon = (addon) => {
     return searchable.includes('opensubtitles') || searchable.includes('open subtitles');
 };
 
-const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
+const StreamsList = ({ className, video, streamVideoId, type, onEpisodeSearch, ...props }) => {
     const { t } = useTranslation();
     const core = useCore();
     const platform = usePlatform();
@@ -46,6 +47,7 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
     const navigate = useNavigate();
     const streamsContainerRef = React.useRef(null);
     const [selectedAddon, setSelectedAddon] = React.useState(ALL_ADDONS_KEY);
+    const [playOnTvRequest, setPlayOnTvRequest] = React.useState(null);
     const installedAddonsUrlParams = React.useMemo(() => ({ type }), [type]);
     const installedAddons = useInstalledAddons(installedAddonsUrlParams);
     const subtitleAddon = React.useMemo(() => {
@@ -134,6 +136,10 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
         onEpisodeSearch(season, episode);
     }, [onEpisodeSearch]);
 
+    const closePlayOnTvModal = React.useCallback(() => {
+        setPlayOnTvRequest(null);
+    }, []);
+
     return (
         <div className={classnames(className, styles['streams-list-container'])}>
             <div className={styles['select-choices-wrapper']}>
@@ -212,6 +218,7 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                                             key={index}
                                             type={type}
                                             videoId={video?.id}
+                                            streamVideoId={video?.id || streamVideoId}
                                             videoReleased={video?.released}
                                             stream={stream}
                                             addonTransportUrl={stream.addonTransportUrl}
@@ -224,6 +231,7 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                                             progress={stream.progress}
                                             deepLinks={stream.deepLinks}
                                             onClick={stream.onClick}
+                                            onPlayOnTvRequest={setPlayOnTvRequest}
                                         />
                                     ))}
                                     {
@@ -249,6 +257,12 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                                 }
                             </React.Fragment>
             }
+            {
+                playOnTvRequest !== null ?
+                    <PlayOnTvModal request={playOnTvRequest} onCloseRequest={closePlayOnTvModal} />
+                    :
+                    null
+            }
         </div>
     );
 };
@@ -257,6 +271,7 @@ StreamsList.propTypes = {
     className: PropTypes.string,
     streams: PropTypes.arrayOf(PropTypes.object).isRequired,
     video: PropTypes.object,
+    streamVideoId: PropTypes.string,
     type: PropTypes.string,
     onEpisodeSearch: PropTypes.func
 };

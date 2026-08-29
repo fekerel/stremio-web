@@ -202,6 +202,7 @@ const MetaDetails = () => {
                             className={styles['streams-list']}
                             streams={metaDetails.streams}
                             video={video}
+                            streamVideoId={streamPath.id}
                             type={streamPath.type}
                             onEpisodeSearch={handleEpisodeSearch}
                         />
