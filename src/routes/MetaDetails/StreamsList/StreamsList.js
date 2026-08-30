@@ -10,7 +10,7 @@ const { default: Icon } = require('@stremio/stremio-icons/react');
 const { Button, Image, MultiselectMenu } = require('stremio/components');
 const { useCore } = require('stremio/core');
 const Stream = require('./Stream');
-const PlayOnTvModal = require('./PlayOnTvModal');
+const SubtitlePreviewModal = require('./SubtitlePreviewModal');
 const styles = require('./styles');
 const { usePlatform, useProfile } = require('stremio/common');
 const useInstalledAddons = require('stremio/routes/Addons/useInstalledAddons');
@@ -259,7 +259,7 @@ const StreamsList = ({ className, video, streamVideoId, type, onEpisodeSearch, .
             }
             {
                 playOnTvRequest !== null ?
-                    <PlayOnTvModal request={playOnTvRequest} onCloseRequest={closePlayOnTvModal} />
+                    <SubtitlePreviewModal request={playOnTvRequest} onCloseRequest={closePlayOnTvModal} />
                     :
                     null
             }
