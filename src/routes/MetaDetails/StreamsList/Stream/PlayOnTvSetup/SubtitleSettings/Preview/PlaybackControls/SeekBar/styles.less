@@ -1,0 +1,87 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+:import('~stremio/components/Slider/styles.less') {
+    slider-track-after: track-after;
+    slider-thumb: thumb;
+}
+
+.seek-bar-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    min-width: 0;
+    height: 100%;
+
+    &.disabled {
+        opacity: 0.55;
+    }
+
+    .source-time-label {
+        width: 100%;
+        overflow: hidden;
+        color: var(--primary-foreground-color);
+        font-size: 0.72rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 500;
+        line-height: 1rem;
+        opacity: 0.82;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .timeline-container {
+        display: flex;
+        flex: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.65rem;
+        width: 100%;
+        height: 2rem;
+        min-width: 0;
+    }
+
+    .time-label {
+        flex: none;
+        width: 3rem;
+        overflow: hidden;
+        color: var(--color-placeholder);
+        font-size: 0.75rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 400;
+        text-align: center;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .slider-wrapper {
+        --track-size: 0.35rem;
+        --thumb-size: 0.9rem;
+
+        flex: 1;
+        align-self: stretch;
+        min-width: 0;
+        margin: 0 var(--thumb-size);
+        overflow: visible;
+    }
+
+    .slider {
+        height: 100%;
+
+        .slider-track-after {
+            background-color: var(--primary-accent-color);
+        }
+
+        .slider-thumb {
+            background-color: var(--primary-foreground-color);
+            transition: transform 150ms ease;
+        }
+
+        &:hover .slider-thumb {
+            transform: translateX(-50%) scale(1.15);
+        }
+    }
+}
