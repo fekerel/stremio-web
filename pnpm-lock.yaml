@@ -159,6 +159,9 @@ importers:
       cssnano-preset-advanced:
         specifier: 7.0.16
         version: 7.0.16(postcss@8.5.14)
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       eslint:
         specifier: ^9.39.4
         version: 9.39.4(jiti@2.6.1)
@@ -2345,6 +2348,10 @@ packages:
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
 
+  dotenv@17.4.2:
+    resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
+    engines: {node: '>=12'}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -3376,7 +3383,7 @@ packages:
     engines: {node: '>=6'}
 
   langs@https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1}
+    resolution: {gitHosted: true, integrity: sha512-fWcYqaDF8BSwZUJq2snbXOsUPyOFz5tTdXcRGVX0nfHg7D/dpB1Xxmou6bRcfmF0pCHQv3dp6kb+MfH39n4IRg==, tarball: https://codeload.github.com/Stremio/nodejs-langs/tar.gz/e5a3af7d2dd556592cbfe7cf879c1064ed0081a1}
     version: 2.0.0
 
   launch-editor@2.13.2:
@@ -4454,7 +4461,7 @@ packages:
     deprecated: The work that was done in this beta branch won't be included in future versions
 
   spatial-navigation-polyfill@https://codeload.github.com/Stremio/spatial-navigation/tar.gz/64871b1422466f5f45d24ebc8bbd315b2ebab6a6:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/Stremio/spatial-navigation/tar.gz/64871b1422466f5f45d24ebc8bbd315b2ebab6a6}
+    resolution: {gitHosted: true, integrity: sha512-AQdN6X+KAF3J7agPKdu5oSmvICFTZBtA3DKNMM+TvX+H3eFL2hMQgUJ3I+vtUpfvy2MSUxv/dgAsu/dy45QG+Q==, tarball: https://codeload.github.com/Stremio/spatial-navigation/tar.gz/64871b1422466f5f45d24ebc8bbd315b2ebab6a6}
     version: 1.2.0
 
   spdy-transport@3.0.0:
@@ -4833,7 +4840,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   vtt.js@https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0:
-    resolution: {gitHosted: true, tarball: https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0}
+    resolution: {gitHosted: true, integrity: sha512-lh+14Ud2Ou18YjKKxj4KFuBLa5e1iiboz6GeknlsIf8Ljt6+tsayf1vQBn+nms3SDxQLnvpBmBqaRDY4BMmDqQ==, tarball: https://codeload.github.com/jaruba/vtt.js/tar.gz/84d33d157848407d790d78423dacc41a096294f0}
     version: 0.13.0
 
   walker@1.0.8:
@@ -7643,6 +7650,8 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.8.1
+
+  dotenv@17.4.2: {}
 
   dunder-proto@1.0.1:
     dependencies:

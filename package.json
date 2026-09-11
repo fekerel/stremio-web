@@ -71,6 +71,7 @@
         "css-loader": "6.11.0",
         "cssnano": "7.1.9",
         "cssnano-preset-advanced": "7.0.16",
+        "dotenv": "17.4.2",
         "eslint": "^9.39.4",
         "eslint-plugin-react": "^7.37.5",
         "eslint-plugin-react-hooks": "^7.1.1",
