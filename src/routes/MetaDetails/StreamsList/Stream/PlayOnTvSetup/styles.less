@@ -1,0 +1,247 @@
+.play-on-tv-container {
+    color: var(--primary-foreground-color);
+}
+
+.play-on-tv-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+    color: var(--primary-foreground-color);
+
+    .section-header-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+
+        .section-title {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+    }
+
+    .actions-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+
+        .load-button-container {
+            flex: none;
+            padding: 0.7rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--primary-accent-color);
+            color: var(--primary-foreground-color);
+        }
+
+        .status-container {
+            font-size: 0.9rem;
+            color: var(--color-placeholder);
+        }
+    }
+
+    .overview-grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+
+        .overview-option-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0.35rem;
+            min-height: 7rem;
+            min-width: 0;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--overlay-color);
+            text-align: left;
+
+            &:hover,
+            &:focus {
+                background-color: var(--primary-accent-color);
+            }
+
+            .overview-option-title,
+            .overview-option-subtitle {
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .overview-option-title {
+                font-weight: 600;
+                color: var(--primary-foreground-color);
+            }
+
+            .overview-option-subtitle {
+                color: var(--color-placeholder);
+            }
+        }
+    }
+
+    .placeholder-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        background-color: var(--overlay-color);
+
+        .placeholder-text {
+            color: var(--color-placeholder);
+        }
+    }
+
+    .device-picker-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        min-height: 0;
+    }
+
+    .selected-device-container {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(5rem, auto);
+        grid-template-areas:
+            "title action"
+            "subtitle action";
+        align-items: center;
+        gap: 0.25rem 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        background-color: var(--overlay-color);
+
+        .selected-device-title,
+        .selected-device-subtitle {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .selected-device-title {
+            grid-area: title;
+            font-weight: 600;
+        }
+
+        .selected-device-subtitle {
+            grid-area: subtitle;
+            color: var(--color-placeholder);
+        }
+
+        .clear-device-button-container {
+            grid-area: action;
+            min-width: 5rem;
+            padding: 0.45rem 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--secondary-accent-color);
+            color: var(--primary-foreground-color);
+        }
+    }
+
+    .error-container {
+        padding: 0.75rem 1rem;
+        border-radius: var(--border-radius);
+        color: var(--danger-accent-color);
+        background-color: var(--overlay-color);
+    }
+
+    .devices-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-height: 0;
+        max-height: 14rem;
+        overflow-y: auto;
+
+        .device-option-container {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(6rem, auto) auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--overlay-color);
+
+            &:hover,
+            &:focus {
+                background-color: var(--primary-accent-color);
+            }
+
+            .device-name,
+            .device-address,
+            .selected-label {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .device-name {
+                font-weight: 600;
+            }
+
+            .device-address {
+                color: var(--color-placeholder);
+            }
+        }
+    }
+
+    .subtitles-list-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-height: 0;
+        overflow-y: auto;
+
+        .subtitle-option-container {
+            display: grid;
+            grid-template-columns: minmax(4rem, 8rem) minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            background-color: var(--overlay-color);
+
+            &:hover,
+            &:focus {
+                background-color: var(--primary-accent-color);
+            }
+
+            .subtitle-id,
+            .subtitle-url,
+            .selected-label {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .subtitle-id {
+                font-weight: 600;
+            }
+
+            .subtitle-url {
+                color: var(--color-placeholder);
+            }
+
+            .selected-label {
+                color: var(--secondary-accent-color);
+            }
+        }
+    }
+
+    @media only screen and (max-width: 48rem) {
+        .overview-grid-container {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+}

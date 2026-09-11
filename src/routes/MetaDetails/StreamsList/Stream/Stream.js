@@ -9,6 +9,7 @@ const { useCore } = require('stremio/core');
 const { useProfile, usePlatform, useToast, useBinaryState } = require('stremio/common');
 const { Button, Image, Popup } = require('stremio/components');
 const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
+const PlayOnTvSetup = require('./PlayOnTvSetup');
 const StreamPlaceholder = require('./StreamPlaceholder');
 const styles = require('./styles');
 
@@ -20,6 +21,7 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
     const routeFocused = useRouteFocused();
 
     const [menuOpen, openMenu, closeMenu, toggleMenu] = useBinaryState(false);
+    const [playOnTvSetupOpen, openPlayOnTvSetup, closePlayOnTvSetup] = useBinaryState(false);
 
     const popupLabelOnMouseUp = React.useCallback((event) => {
         if (!event.nativeEvent.togglePopupPrevented) {
@@ -197,6 +199,12 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
         }
     }, [streamLink]);
 
+    const openPlayOnTvSetupMenu = React.useCallback((event) => {
+        event.preventDefault();
+        closeMenu();
+        openPlayOnTvSetup();
+    }, [closeMenu, openPlayOnTvSetup]);
+
     const renderThumbnailFallback = React.useCallback(() => (
         <Icon className={styles['placeholder-icon']} name={'ic_broken_link'} />
     ), []);
@@ -247,6 +255,10 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
                     <Icon className={styles['menu-icon']} name={'play'} />
                     <div className={styles['context-menu-option-label']}>{t('CTX_PLAY')}</div>
                 </Button>
+                <Button className={styles['context-menu-option-container']} title={'Play on TV setup'} onClick={openPlayOnTvSetupMenu}>
+                    <Icon className={styles['menu-icon']} name={'subtitles'} />
+                    <div className={styles['context-menu-option-label']}>Play on TV setup</div>
+                </Button>
                 {
                     streamLink &&
                         <Button className={styles['context-menu-option-container']} title={t('CTX_COPY_STREAM_LINK')} onClick={copyStreamLink}>
@@ -270,7 +282,7 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
                 }
             </div>
         );
-    }, [copyStreamLink, onClick]);
+    }, [copyDownloadLink, copyMagnetLink, copyStreamLink, description, downloadLink, magnetLink, openPlayOnTvSetupMenu, popupMenuOnClick, popupMenuOnContextMenu, popupMenuOnKeyDown, popupMenuOnPointerDown, streamLink]);
 
     React.useEffect(() => {
         if (!routeFocused) {
@@ -279,16 +291,24 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
     }, [routeFocused]);
 
     return (
-        <Popup
-            className={className}
-            onMouseUp={popupLabelOnMouseUp}
-            onLongPress={popupLabelOnLongPress}
-            onContextMenu={popupLabelOnContextMenu}
-            open={menuOpen}
-            onCloseRequest={closeMenu}
-            renderLabel={renderLabel}
-            renderMenu={renderMenu}
-        />
+        <>
+            <Popup
+                className={className}
+                onMouseUp={popupLabelOnMouseUp}
+                onLongPress={popupLabelOnLongPress}
+                onContextMenu={popupLabelOnContextMenu}
+                open={menuOpen}
+                onCloseRequest={closeMenu}
+                renderLabel={renderLabel}
+                renderMenu={renderMenu}
+            />
+            {
+                playOnTvSetupOpen ?
+                    <PlayOnTvSetup videoId={videoId} onCloseRequest={closePlayOnTvSetup} />
+                    :
+                    null
+            }
+        </>
     );
 };
 
