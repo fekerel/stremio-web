@@ -1,9 +1,11 @@
 // Copyright (C) 2017-2023 Smart code 203358507
 
 const path = require('path');
+const fs = require('fs');
 const os = require('os');
 const { execSync } = require('child_process');
 const webpack = require('webpack');
+const dotenv = require('dotenv');
 const threadLoader = require('thread-loader');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -13,6 +15,10 @@ const TerserPlugin = require('terser-webpack-plugin');
 const packageJson = require('./package.json');
 
 const COMMIT_HASH = execSync('git rev-parse HEAD').toString().trim();
+const LOCAL_DOT_ENV_PATH = path.resolve(__dirname, '.env.local');
+const localDotEnv = fs.existsSync(LOCAL_DOT_ENV_PATH) ?
+    dotenv.parse(fs.readFileSync(LOCAL_DOT_ENV_PATH)) :
+    {};
 
 const THREAD_LOADER = {
     loader: 'thread-loader',
@@ -33,7 +39,7 @@ threadLoader.warmup(
     ],
 );
 
-module.exports = (env, argv) => ({
+module.exports = (env = {}, argv) => ({
     mode: argv.mode,
     devtool: argv.mode === 'production' ? 'source-map' : 'eval-source-map',
     entry: {
@@ -211,7 +217,9 @@ module.exports = (env, argv) => ({
         new webpack.ProgressPlugin(),
         new webpack.EnvironmentPlugin({
             SENTRY_DSN: null,
+            ...localDotEnv,
             ...env,
+            WEBPACK_SERVE: env.WEBPACK_SERVE || false,
             SERVICE_WORKER_DISABLED: false,
             DEBUG: argv.mode !== 'production',
             VERSION: packageJson.version,
