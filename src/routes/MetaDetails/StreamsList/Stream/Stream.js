@@ -13,7 +13,7 @@ const PlayOnTvSetup = require('./PlayOnTvSetup');
 const StreamPlaceholder = require('./StreamPlaceholder');
 const styles = require('./styles');
 
-const Stream = ({ className, videoId, videoReleased, addonName, name, description, thumbnail, progress, deepLinks, ...props }) => {
+const Stream = ({ className, stream, type, videoId, videoReleased, addonName, name, description, thumbnail, progress, deepLinks, ...props }) => {
     const profile = useProfile();
     const toast = useToast();
     const platform = usePlatform();
@@ -304,7 +304,13 @@ const Stream = ({ className, videoId, videoReleased, addonName, name, descriptio
             />
             {
                 playOnTvSetupOpen ?
-                    <PlayOnTvSetup videoId={videoId} onCloseRequest={closePlayOnTvSetup} />
+                    <PlayOnTvSetup
+                        stream={stream}
+                        streamLink={streamLink}
+                        type={type}
+                        videoId={videoId}
+                        onCloseRequest={closePlayOnTvSetup}
+                    />
                     :
                     null
             }
@@ -316,6 +322,8 @@ Stream.Placeholder = StreamPlaceholder;
 
 Stream.propTypes = {
     className: PropTypes.string,
+    stream: PropTypes.object,
+    type: PropTypes.string,
     videoId: PropTypes.string,
     videoReleased: PropTypes.instanceOf(Date),
     addonName: PropTypes.string,

@@ -7,6 +7,7 @@ const DevicePicker = require('./DevicePicker');
 const { DevicePickerProvider } = require('./DevicePicker/DevicePickerContext');
 const MediaInfo = require('./MediaInfo');
 const Overview = require('./Overview');
+const { StreamInfoProvider } = require('./StreamInfoContext');
 const SubtitleSettings = require('./SubtitleSettings');
 const { SubtitleProvider } = require('./SubtitleSettings/SubtitleContext');
 const styles = require('./styles');
@@ -25,7 +26,7 @@ const SCREEN_TITLES = {
     [SCREENS.SUBTITLES]: 'Subtitle settings'
 };
 
-const PlayOnTvSetup = ({ videoId, onCloseRequest }) => {
+const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) => {
     const [activeScreen, setActiveScreen] = React.useState(SCREENS.OVERVIEW);
 
     const openOverview = React.useCallback(() => {
@@ -73,23 +74,28 @@ const PlayOnTvSetup = ({ videoId, onCloseRequest }) => {
     };
 
     return (
-        <DevicePickerProvider>
-            <SubtitleProvider videoId={videoId}>
-                <ModalScreen
-                    className={styles['play-on-tv-container']}
-                    title={SCREEN_TITLES[activeScreen]}
-                    backButtonVisible={activeScreen !== SCREENS.OVERVIEW}
-                    onBackRequest={handleBackRequest}
-                    onCloseRequest={onCloseRequest}
-                >
-                    {renderActiveScreen()}
-                </ModalScreen>
-            </SubtitleProvider>
-        </DevicePickerProvider>
+        <StreamInfoProvider stream={stream} streamLink={streamLink} type={type} videoId={videoId}>
+            <DevicePickerProvider>
+                <SubtitleProvider videoId={videoId}>
+                    <ModalScreen
+                        className={styles['play-on-tv-container']}
+                        title={SCREEN_TITLES[activeScreen]}
+                        backButtonVisible={activeScreen !== SCREENS.OVERVIEW}
+                        onBackRequest={handleBackRequest}
+                        onCloseRequest={onCloseRequest}
+                    >
+                        {renderActiveScreen()}
+                    </ModalScreen>
+                </SubtitleProvider>
+            </DevicePickerProvider>
+        </StreamInfoProvider>
     );
 };
 
 PlayOnTvSetup.propTypes = {
+    stream: PropTypes.object,
+    streamLink: PropTypes.string,
+    type: PropTypes.string,
     videoId: PropTypes.string,
     onCloseRequest: PropTypes.func
 };

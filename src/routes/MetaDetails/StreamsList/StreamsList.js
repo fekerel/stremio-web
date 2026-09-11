@@ -176,6 +176,8 @@ const StreamsList = ({ className, video, type, onEpisodeSearch, ...props }) => {
                                     {filteredStreams.map((stream, index) => (
                                         <Stream
                                             key={index}
+                                            stream={stream}
+                                            type={type}
                                             videoId={video?.id}
                                             videoReleased={video?.released}
                                             addonName={stream.addonName}
