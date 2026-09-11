@@ -16,6 +16,7 @@ import MetaItem from './MetaItem';
 import MetaPreview from './MetaPreview';
 import MetaRow from './MetaRow';
 import ModalDialog from './ModalDialog';
+import ModalScreen from './ModalScreen';
 import Multiselect from './Multiselect';
 import MultiselectMenu from './MultiselectMenu';
 import { HorizontalNavBar, VerticalNavBar } from './NavBar';
@@ -51,6 +52,7 @@ export {
     MetaPreview,
     MetaRow,
     ModalDialog,
+    ModalScreen,
     Multiselect,
     MultiselectMenu,
     HorizontalNavBar,
