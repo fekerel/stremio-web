@@ -2,8 +2,10 @@
 
 const client = require('./client');
 const useStremoteRequest = require('./useStremoteRequest');
+const useStremoteSocket = require('./useStremoteSocket');
 
 module.exports = {
     ...client,
-    useStremoteRequest
+    useStremoteRequest,
+    useStremoteSocket
 };
