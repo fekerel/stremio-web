@@ -7,6 +7,7 @@ const { ToastProvider, useToast } = require('./Toast');
 const { TooltipProvider, Tooltip } = require('./Tooltips');
 const { ShortcutsProvider, useShortcuts, onShortcut, getKeyboardShortcutKey, getKeyboardShortcutKeys } = require('./Shortcuts');
 const { DiscordProvider, useDiscord, EMPTY_DISCORD_TIMESTAMPS, getPlaybackDiscordActivity } = require('./Discord');
+const StremoteServer = require('./StremoteServer');
 const CONSTANTS = require('./CONSTANTS');
 const { withCoreSuspender, useCoreSuspender } = require('./CoreSuspender');
 const getVisibleChildrenRange = require('./getVisibleChildrenRange');
@@ -17,6 +18,7 @@ const routesRegexp = require('./routesRegexp');
 const useAnimationFrame = require('./useAnimationFrame');
 const useBinaryState = require('./useBinaryState');
 const { default: useInterval } = require('./useInterval');
+const useLatestAsync = require('./useLatestAsync');
 const useLiveRef = require('./useLiveRef');
 const useModelState = require('./useModelState');
 const useNotifications = require('./useNotifications');
@@ -52,6 +54,7 @@ module.exports = {
     useDiscord,
     EMPTY_DISCORD_TIMESTAMPS,
     getPlaybackDiscordActivity,
+    StremoteServer,
     CONSTANTS,
     withCoreSuspender,
     useCoreSuspender,
@@ -64,6 +67,7 @@ module.exports = {
     useBinaryState,
     useFullscreen,
     useInterval,
+    useLatestAsync,
     useLiveRef,
     useModelState,
     useNotifications,
