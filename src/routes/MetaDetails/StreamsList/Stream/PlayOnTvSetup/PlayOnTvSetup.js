@@ -7,23 +7,27 @@ const DevicePicker = require('./DevicePicker');
 const { DevicePickerProvider } = require('./DevicePicker/DevicePickerContext');
 const MediaInfo = require('./MediaInfo');
 const Overview = require('./Overview');
+const { ProbeProvider } = require('./ProbeContext');
 const { StreamInfoProvider } = require('./StreamInfoContext');
 const SubtitleSettings = require('./SubtitleSettings');
 const { SubtitleProvider } = require('./SubtitleSettings/SubtitleContext');
+const SubtitlePreviewVideo = require('./SubtitleSettings/SubtitlePreviewVideo');
 const styles = require('./styles');
 
 const SCREENS = {
     OVERVIEW: 'overview',
     DEVICES: 'devices',
     MEDIA_INFO: 'media-info',
-    SUBTITLES: 'subtitles'
+    SUBTITLES: 'subtitles',
+    SUBTITLE_PREVIEW: 'subtitle-preview'
 };
 
 const SCREEN_TITLES = {
     [SCREENS.OVERVIEW]: 'Play on TV',
     [SCREENS.DEVICES]: 'Devices',
     [SCREENS.MEDIA_INFO]: 'Media info',
-    [SCREENS.SUBTITLES]: 'Subtitle settings'
+    [SCREENS.SUBTITLES]: 'Subtitle settings',
+    [SCREENS.SUBTITLE_PREVIEW]: 'Subtitle preview'
 };
 
 const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) => {
@@ -45,6 +49,10 @@ const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) =>
         setActiveScreen(SCREENS.SUBTITLES);
     }, []);
 
+    const openSubtitlePreview = React.useCallback(() => {
+        setActiveScreen(SCREENS.SUBTITLE_PREVIEW);
+    }, []);
+
     const handleBackRequest = React.useCallback(() => {
         if (activeScreen === SCREENS.OVERVIEW) {
             onCloseRequest();
@@ -60,7 +68,9 @@ const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) =>
             case SCREENS.MEDIA_INFO:
                 return <MediaInfo />;
             case SCREENS.SUBTITLES:
-                return <SubtitleSettings />;
+                return <SubtitleSettings onSubtitlePreviewOpen={openSubtitlePreview} />;
+            case SCREENS.SUBTITLE_PREVIEW:
+                return <SubtitlePreviewVideo />;
             case SCREENS.OVERVIEW:
             default:
                 return (
@@ -75,19 +85,21 @@ const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) =>
 
     return (
         <StreamInfoProvider stream={stream} streamLink={streamLink} type={type} videoId={videoId}>
-            <DevicePickerProvider>
-                <SubtitleProvider videoId={videoId}>
-                    <ModalScreen
-                        className={styles['play-on-tv-container']}
-                        title={SCREEN_TITLES[activeScreen]}
-                        backButtonVisible={activeScreen !== SCREENS.OVERVIEW}
-                        onBackRequest={handleBackRequest}
-                        onCloseRequest={onCloseRequest}
-                    >
-                        {renderActiveScreen()}
-                    </ModalScreen>
-                </SubtitleProvider>
-            </DevicePickerProvider>
+            <ProbeProvider>
+                <DevicePickerProvider>
+                    <SubtitleProvider videoId={videoId}>
+                        <ModalScreen
+                            className={styles['play-on-tv-container']}
+                            title={SCREEN_TITLES[activeScreen]}
+                            backButtonVisible={activeScreen !== SCREENS.OVERVIEW}
+                            onBackRequest={handleBackRequest}
+                            onCloseRequest={onCloseRequest}
+                        >
+                            {renderActiveScreen()}
+                        </ModalScreen>
+                    </SubtitleProvider>
+                </DevicePickerProvider>
+            </ProbeProvider>
         </StreamInfoProvider>
     );
 };

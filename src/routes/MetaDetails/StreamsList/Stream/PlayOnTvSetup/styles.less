@@ -45,48 +45,6 @@
         }
     }
 
-    .overview-grid-container {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.75rem;
-
-        .overview-option-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            justify-content: center;
-            gap: 0.35rem;
-            min-height: 7rem;
-            min-width: 0;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            background-color: var(--overlay-color);
-            text-align: left;
-
-            &:hover,
-            &:focus {
-                background-color: var(--primary-accent-color);
-            }
-
-            .overview-option-title,
-            .overview-option-subtitle {
-                max-width: 100%;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            .overview-option-title {
-                font-weight: 600;
-                color: var(--primary-foreground-color);
-            }
-
-            .overview-option-subtitle {
-                color: var(--color-placeholder);
-            }
-        }
-    }
-
     .placeholder-container {
         display: flex;
         flex-direction: column;
@@ -204,7 +162,7 @@
 
         .subtitle-option-container {
             display: grid;
-            grid-template-columns: minmax(4rem, 8rem) minmax(0, 1fr) auto;
+            grid-template-columns: minmax(3rem, 5rem) minmax(4rem, 8rem) minmax(0, 1fr) auto;
             align-items: center;
             gap: 1rem;
             padding: 0.75rem 1rem;
@@ -216,6 +174,7 @@
                 background-color: var(--primary-accent-color);
             }
 
+            .subtitle-lang,
             .subtitle-id,
             .subtitle-url,
             .selected-label {
@@ -229,6 +188,12 @@
                 font-weight: 600;
             }
 
+            .subtitle-lang {
+                color: var(--secondary-accent-color);
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
             .subtitle-url {
                 color: var(--color-placeholder);
             }
@@ -236,12 +201,6 @@
             .selected-label {
                 color: var(--secondary-accent-color);
             }
-        }
-    }
-
-    @media only screen and (max-width: 48rem) {
-        .overview-grid-container {
-            grid-template-columns: minmax(0, 1fr);
         }
     }
 }

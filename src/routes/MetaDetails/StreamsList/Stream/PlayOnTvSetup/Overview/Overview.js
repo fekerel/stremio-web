@@ -5,7 +5,15 @@ const PropTypes = require('prop-types');
 const { Button } = require('stremio/components');
 const { useDevicePicker } = require('../DevicePicker/DevicePickerContext');
 const { usePreviewSubtitles } = require('../SubtitleSettings/SubtitleContext');
-const styles = require('../styles');
+const styles = require('./styles');
+
+const formatSubtitleDelay = (delay) => {
+    if (typeof delay !== 'number' || !isFinite(delay)) {
+        return '0.00s';
+    }
+
+    return `${(delay / 1000).toFixed(2)}s`;
+};
 
 const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen }) => {
     const {
@@ -14,37 +22,61 @@ const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen 
     } = useDevicePicker();
     const {
         availableSubtitles,
-        selectedSubtitle
+        selectedSubtitle,
+        subtitleDelay
     } = usePreviewSubtitles();
 
+    const selectedDeviceLabel = selectedDevice !== null ?
+        selectedDevice.friendlyName || selectedDevice.name || selectedDevice.id
+        :
+        'No device selected';
+    const subtitleLanguage = selectedSubtitle !== null ?
+        selectedSubtitle.lang || 'unknown'
+        :
+        'Not selected';
+
     return (
-        <div className={styles['play-on-tv-content']}>
-            <div className={styles['overview-grid-container']}>
+        <div className={styles['overview-container']}>
+            <div className={styles['status-panel']}>
+                <div className={styles['status-row']}>
+                    <div className={styles['status-label']}>Device</div>
+                    <div className={styles['status-value']}>{selectedDeviceLabel}</div>
+                </div>
+                <div className={styles['status-row']}>
+                    <div className={styles['status-label']}>Subtitle language</div>
+                    <div className={styles['status-value']}>{subtitleLanguage}</div>
+                </div>
+                <div className={styles['status-row']}>
+                    <div className={styles['status-label']}>Subtitle shift</div>
+                    <div className={styles['status-value']}>{formatSubtitleDelay(subtitleDelay)}</div>
+                </div>
+            </div>
+            <div className={styles['actions-grid']}>
                 <Button
-                    className={styles['overview-option-container']}
+                    className={styles['action-card']}
                     title={'Open device picker'}
                     onClick={onDevicePickerOpen}
                 >
-                    <div className={styles['overview-option-title']}>Device picker</div>
-                    <div className={styles['overview-option-subtitle']}>
-                        {selectedDevice !== null ? selectedDevice.friendlyName || selectedDevice.id : `${devices.length} devices found`}
+                    <div className={styles['action-title']}>Device picker</div>
+                    <div className={styles['action-subtitle']}>
+                        {selectedDevice !== null ? selectedDeviceLabel : `${devices.length} devices found`}
                     </div>
                 </Button>
                 <Button
-                    className={styles['overview-option-container']}
+                    className={styles['action-card']}
                     title={'Open media info'}
                     onClick={onMediaInfoOpen}
                 >
-                    <div className={styles['overview-option-title']}>Media info</div>
-                    <div className={styles['overview-option-subtitle']}>Stream technical details</div>
+                    <div className={styles['action-title']}>Media info</div>
+                    <div className={styles['action-subtitle']}>Container, video, audio and subtitles</div>
                 </Button>
                 <Button
-                    className={styles['overview-option-container']}
+                    className={styles['action-card']}
                     title={'Open subtitle settings'}
                     onClick={onSubtitleSettingsOpen}
                 >
-                    <div className={styles['overview-option-title']}>Subtitle settings</div>
-                    <div className={styles['overview-option-subtitle']}>
+                    <div className={styles['action-title']}>Subtitle settings</div>
+                    <div className={styles['action-subtitle']}>
                         {selectedSubtitle !== null ? selectedSubtitle.id : `${availableSubtitles.length} subtitles loaded`}
                     </div>
                 </Button>

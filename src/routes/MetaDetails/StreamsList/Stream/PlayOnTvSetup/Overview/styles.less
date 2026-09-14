@@ -1,0 +1,118 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+.overview-container {
+    box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: 0;
+    padding: 0 1rem 1rem;
+    color: var(--primary-foreground-color);
+}
+
+.status-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.045);
+}
+
+.status-row {
+    display: grid;
+    grid-template-columns: minmax(7rem, auto) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: center;
+    min-width: 0;
+}
+
+.status-label,
+.status-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.status-label {
+    color: var(--color-placeholder);
+    font-size: 0.85rem;
+}
+
+.status-value {
+    color: var(--primary-foreground-color);
+    font-weight: 600;
+    text-align: right;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    min-height: 0;
+}
+
+.action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+    min-height: 7rem;
+    padding: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: var(--border-radius);
+    background-color: var(--overlay-color);
+    color: var(--primary-foreground-color);
+    text-align: left;
+}
+
+.action-card:hover,
+.action-card:focus {
+    background-color: var(--primary-accent-color);
+}
+
+.action-title,
+.action-subtitle {
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.action-title {
+    font-weight: 700;
+}
+
+.action-subtitle {
+    color: var(--color-placeholder);
+    font-size: 0.9rem;
+}
+
+@media only screen and (max-width: 48rem) {
+    .overview-container {
+        padding: 0 0.75rem 0.75rem;
+    }
+
+    .status-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.2rem;
+    }
+
+    .status-value {
+        text-align: left;
+    }
+
+    .actions-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .action-card {
+        min-height: 5.75rem;
+    }
+}

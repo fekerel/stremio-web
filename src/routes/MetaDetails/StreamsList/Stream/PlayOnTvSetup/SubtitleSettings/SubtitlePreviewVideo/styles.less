@@ -1,0 +1,410 @@
+// Copyright (C) 2017-2023 Smart code 203358507
+
+.subtitle-preview-container {
+    box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-height: 0;
+    padding: 0 1rem 1rem;
+    color: var(--primary-foreground-color);
+}
+
+.video-panel,
+.shift-panel,
+.cues-panel,
+.error-state {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.045);
+}
+
+.video-panel {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.video-frame {
+    position: relative;
+    width: 100%;
+    max-height: 45vh;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background-color: black;
+}
+
+.video-inner {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.video-inner * {
+    font-size: inherit;
+}
+
+.video-controls {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+    grid-template-areas:
+        'play spacer subtitles'
+        'seek seek seek';
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.7rem;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
+}
+
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0.6rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.13);
+    color: var(--primary-foreground-color);
+}
+
+.icon-button:hover,
+.icon-button:focus,
+.icon-button.active {
+    background-color: var(--primary-accent-color);
+}
+
+.icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.play-button {
+    grid-area: play;
+}
+
+.subtitles-button {
+    grid-area: subtitles;
+}
+
+.video-seek {
+    --track-size: 0.35rem;
+    --thumb-size: 1rem;
+
+    grid-area: seek;
+    min-width: 0;
+    height: 2.25rem;
+}
+
+.subtitles-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    min-height: 4rem;
+    max-height: 16rem;
+    overflow: hidden;
+    margin: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: var(--border-radius);
+    background-color: rgba(11, 13, 24, 0.94);
+    color: var(--primary-foreground-color);
+    box-shadow: 0 0.6rem 1.5rem rgba(0, 0, 0, 0.35);
+}
+
+.subtitles-menu-header {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.subtitles-menu-title {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--primary-foreground-color);
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitles-menu-status {
+    flex: none;
+    color: var(--color-placeholder);
+    font-size: 0.78rem;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.menu-error {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--danger-accent-color);
+    font-size: 0.86rem;
+}
+
+.menu-error span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitles-options-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.subtitle-option {
+    display: grid;
+    grid-template-columns: minmax(3rem, 4.5rem) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+    min-width: 0;
+    overflow: hidden;
+    min-height: 2.35rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.12);
+    color: var(--primary-foreground-color);
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.subtitle-option:hover,
+.subtitle-option:focus,
+.subtitle-option.selected {
+    background-color: var(--primary-accent-color);
+}
+
+.subtitle-option-lang,
+.subtitle-option-label,
+.subtitle-option-meta {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitle-option-lang {
+    color: var(--secondary-accent-color);
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.subtitle-option-label {
+    font-weight: 700;
+}
+
+.subtitle-option-meta {
+    color: var(--secondary-accent-color);
+    font-size: 0.75rem;
+}
+
+.shift-panel {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(5rem, auto) minmax(0, 1fr) minmax(5rem, auto);
+    grid-template-areas: 'back value forward';
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+}
+
+.shift-button,
+.center-button,
+.retry-button {
+    flex: none;
+    padding: 0.6rem 0.8rem;
+    border-radius: var(--border-radius);
+    background-color: var(--primary-accent-color);
+    color: var(--primary-foreground-color);
+}
+
+.shift-button-back {
+    grid-area: back;
+}
+
+.shift-button-forward {
+    grid-area: forward;
+}
+
+.shift-value {
+    grid-area: value;
+    min-width: 0;
+    text-align: center;
+}
+
+.shift-label {
+    color: var(--color-placeholder);
+    font-size: 0.78rem;
+}
+
+.shift-time {
+    margin-top: 0.15rem;
+    color: var(--primary-foreground-color);
+    font-weight: 800;
+}
+
+.cues-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    min-height: 12rem;
+    overflow: hidden;
+    padding: 0.75rem;
+}
+
+.cues-header {
+    flex: none;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.cues-title {
+    min-width: 0;
+    font-weight: 800;
+}
+
+.cues-subtitle,
+.subtitle-status,
+.empty-state {
+    color: var(--color-placeholder);
+    font-size: 0.86rem;
+}
+
+.cues-subtitle {
+    margin-top: 0.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitle-status {
+    flex: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cues-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-height: 0;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+.cue-row {
+    flex: none;
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    gap: 0.75rem;
+    align-items: start;
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--border-radius);
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+.cue-row.active {
+    border-color: rgba(124, 92, 255, 0.85);
+    background-color: rgba(124, 92, 255, 0.22);
+}
+
+.cue-time {
+    color: var(--secondary-accent-color);
+    font-size: 0.82rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.cue-text {
+    min-width: 0;
+    color: var(--primary-foreground-color);
+    line-height: 1.35;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.error-state {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    color: var(--danger-accent-color);
+}
+
+@media only screen and (max-width: 48rem) {
+    .subtitle-preview-container {
+        padding: 0 0.75rem 0.75rem;
+    }
+
+    .video-frame {
+        max-height: 34vh;
+    }
+
+    .video-controls {
+        grid-template-columns: 2.35rem minmax(0, 1fr) 2.35rem;
+        grid-template-areas:
+            'play spacer subtitles'
+            'seek seek seek';
+        gap: 0.45rem;
+        padding: 0.55rem;
+    }
+
+    .icon-button {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+
+    .video-seek {
+        height: 2rem;
+    }
+
+    .subtitles-menu {
+        max-height: 13rem;
+        margin: 0.55rem;
+    }
+
+    .shift-panel {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+            'value value'
+            'back forward';
+    }
+
+    .cue-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0.35rem;
+    }
+}

@@ -8,6 +8,7 @@ const { useCore } = require('stremio/core');
 const { Routes } = require('stremio-router');
 const { Chromecast, ServicesProvider, GamepadProvider } = require('stremio/services');
 const { FullscreenProvider, ToastProvider, TooltipProvider, ShortcutsProvider, DiscordProvider, CONSTANTS, useBinaryState, useProfile, withCoreSuspender, onFileDrop, usePlatform } = require('stremio/common');
+const usePWA = require('stremio/common/usePWA');
 const ServicesToaster = require('./ServicesToaster');
 const SearchParamsHandler = require('./SearchParamsHandler');
 const DeepLinkHandler = require('./DeepLinkHandler');
@@ -18,12 +19,19 @@ const styles = require('./styles');
 
 const ProtectedRoutes = withCoreSuspender(Routes);
 const NAVIGATE_TABS_ROUTES = ['/', '/discover', '/library', '/calendar', '/addons', '/settings'];
+const isEditableElement = (element) => {
+    return element instanceof HTMLElement && (
+        element.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(element.tagName)
+    );
+};
 
 const App = () => {
     const core = useCore();
     const profile = useProfile();
     const { i18n } = useTranslation();
     const { shell } = usePlatform();
+    const [isIOSPWA, isAndroidPWA] = usePWA();
     const navigate = useNavigate();
     const [gamepadSupportEnabled, setGamepadSupportEnabled] = React.useState(false);
     const services = React.useMemo(() => {
@@ -81,6 +89,30 @@ const App = () => {
             window.removeEventListener('hashchange', onLocationHashChange);
         };
     }, []);
+
+    React.useEffect(() => {
+        if (!isIOSPWA && !isAndroidPWA) {
+            return;
+        }
+
+        const preventNativeLongPress = (event) => {
+            if (isEditableElement(event.target)) {
+                return;
+            }
+
+            event.preventDefault();
+        };
+
+        window.addEventListener('contextmenu', preventNativeLongPress);
+        window.addEventListener('selectstart', preventNativeLongPress);
+        window.addEventListener('dragstart', preventNativeLongPress);
+
+        return () => {
+            window.removeEventListener('contextmenu', preventNativeLongPress);
+            window.removeEventListener('selectstart', preventNativeLongPress);
+            window.removeEventListener('dragstart', preventNativeLongPress);
+        };
+    }, [isIOSPWA, isAndroidPWA]);
 
     React.useEffect(() => {
         const onChromecastStateChange = () => {

@@ -122,6 +122,8 @@
     outline: none;
     list-style: none;
     user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
     text-decoration: none;
     appearance: none;
     background: none;
@@ -161,14 +163,15 @@ html {
     overflow: auto;
     overscroll-behavior: none;
     user-select: none;
+    -webkit-user-select: none;
     touch-action: manipulation;
     background-color: var(--primary-background-color);
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
 
     @media (display-mode: standalone) {
         width: @html-standalone-width;
         height: @html-standalone-height;
-        -webkit-touch-callout: none;
     }
 
     body {

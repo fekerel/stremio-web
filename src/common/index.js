@@ -17,6 +17,7 @@ const languages = require('./languages');
 const routesRegexp = require('./routesRegexp');
 const useAnimationFrame = require('./useAnimationFrame');
 const useBinaryState = require('./useBinaryState');
+const useHttpRequest = require('./useHttpRequest');
 const { default: useInterval } = require('./useInterval');
 const useLatestAsync = require('./useLatestAsync');
 const useLiveRef = require('./useLiveRef');
@@ -65,6 +66,7 @@ module.exports = {
     routesRegexp,
     useAnimationFrame,
     useBinaryState,
+    useHttpRequest,
     useFullscreen,
     useInterval,
     useLatestAsync,
