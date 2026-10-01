@@ -55,6 +55,41 @@
     min-height: 0;
 }
 
+.session-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.cancel-button,
+.play-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 4.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--border-radius);
+    color: var(--primary-foreground-color);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.cancel-button {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.play-button {
+    background-color: var(--primary-accent-color);
+}
+
+.cancel-button:hover,
+.cancel-button:focus,
+.play-button:hover,
+.play-button:focus {
+    filter: brightness(1.12);
+}
+
 .action-card {
     display: flex;
     flex-direction: column;
@@ -114,5 +149,10 @@
 
     .action-card {
         min-height: 5.75rem;
+    }
+
+    .cancel-button,
+    .play-button {
+        min-height: 3.75rem;
     }
 }

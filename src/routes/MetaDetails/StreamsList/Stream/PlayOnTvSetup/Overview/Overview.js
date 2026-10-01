@@ -5,6 +5,7 @@ const PropTypes = require('prop-types');
 const { Button } = require('stremio/components');
 const { useDevicePicker } = require('../DevicePicker/DevicePickerContext');
 const { usePreviewSubtitles } = require('../SubtitleSettings/SubtitleContext');
+const usePlayOnTvSession = require('../usePlayOnTvSession');
 const styles = require('./styles');
 
 const formatSubtitleDelay = (delay) => {
@@ -15,7 +16,7 @@ const formatSubtitleDelay = (delay) => {
     return `${(delay / 1000).toFixed(2)}s`;
 };
 
-const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen }) => {
+const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen, onCancelRequest }) => {
     const {
         devices,
         selectedDevice
@@ -25,6 +26,13 @@ const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen 
         selectedSubtitle,
         subtitleDelay
     } = usePreviewSubtitles();
+    const {
+        canPlay,
+        loading: playLoading,
+        play
+    } = usePlayOnTvSession({
+        onSuccess: onCancelRequest
+    });
 
     const selectedDeviceLabel = selectedDevice !== null ?
         selectedDevice.friendlyName || selectedDevice.name || selectedDevice.id
@@ -81,6 +89,23 @@ const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen 
                     </div>
                 </Button>
             </div>
+            <div className={styles['session-actions']}>
+                <Button
+                    className={styles['cancel-button']}
+                    title={'Cancel Play on TV setup'}
+                    onClick={onCancelRequest}
+                >
+                    Cancel
+                </Button>
+                <Button
+                    className={styles['play-button']}
+                    title={'Play on selected TV'}
+                    disabled={!canPlay}
+                    onClick={play}
+                >
+                    {playLoading ? 'Starting...' : 'Play'}
+                </Button>
+            </div>
         </div>
     );
 };
@@ -88,7 +113,8 @@ const Overview = ({ onDevicePickerOpen, onMediaInfoOpen, onSubtitleSettingsOpen 
 Overview.propTypes = {
     onDevicePickerOpen: PropTypes.func,
     onMediaInfoOpen: PropTypes.func,
-    onSubtitleSettingsOpen: PropTypes.func
+    onSubtitleSettingsOpen: PropTypes.func,
+    onCancelRequest: PropTypes.func
 };
 
 module.exports = Overview;

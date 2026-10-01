@@ -12,8 +12,6 @@ const { usePreviewSubtitles } = require('../SubtitleContext');
 const styles = require('./styles');
 
 const SUBTITLE_TRACK_ID_PREFIX = 'PREVIEW_SUBTITLE_';
-const DISPLAY_CLOCK_UPDATE_THRESHOLD = 100;
-
 const getSubtitleTrackId = (subtitle) => `${SUBTITLE_TRACK_ID_PREFIX}${subtitle.key}`;
 const getSubtitleLabel = (subtitle) => subtitle.lang ? `${subtitle.lang} - ${subtitle.id}` : subtitle.id;
 const getSubtitleOptionLabel = (subtitle, index) => {
@@ -55,59 +53,54 @@ const readVideoElementTime = (containerElement) => {
         null;
 };
 
-const usePlaybackDisplayTime = ({ containerRef, fallbackTime, duration }) => {
-    const [displayTime, setDisplayTime] = React.useState(fallbackTime);
-    const fallbackTimeRef = React.useRef(fallbackTime);
-    const durationRef = React.useRef(duration);
+const readVideoElementBuffered = (containerElement) => {
+    const videoElement = containerElement instanceof HTMLElement ?
+        containerElement.querySelector('video')
+        :
+        null;
+
+    if (!(videoElement instanceof HTMLVideoElement) || !isFiniteNumber(videoElement.currentTime)) {
+        return null;
+    }
+
+    for (let i = 0; i < videoElement.buffered.length; i++) {
+        if (videoElement.buffered.start(i) <= videoElement.currentTime && videoElement.currentTime <= videoElement.buffered.end(i)) {
+            return Math.floor(videoElement.buffered.end(i) * 1000);
+        }
+    }
+
+    return null;
+};
+
+const BufferedTime = ({ containerRef }) => {
+    const [buffered, setBuffered] = React.useState(null);
 
     React.useEffect(() => {
-        fallbackTimeRef.current = fallbackTime;
-    }, [fallbackTime]);
+        const update = () => {
+            const nextBuffered = readVideoElementBuffered(containerRef.current);
 
-    React.useEffect(() => {
-        durationRef.current = duration;
-    }, [duration]);
-
-    const syncDisplayTime = React.useCallback((nextTime) => {
-        const clampedTime = clampDisplayTime(nextTime, duration);
-
-        setDisplayTime(clampedTime);
-    }, [duration]);
-
-    React.useEffect(() => {
-        let animationFrame = null;
-
-        const tick = () => {
-            const videoElementTime = readVideoElementTime(containerRef.current);
-            const nextTime = clampDisplayTime(
-                videoElementTime !== null ? videoElementTime : fallbackTimeRef.current,
-                durationRef.current
-            );
-
-            setDisplayTime((currentTime) => {
-                return currentTime !== nextTime && (
-                    !isFiniteNumber(currentTime) ||
-                    !isFiniteNumber(nextTime) ||
-                    Math.abs(currentTime - nextTime) >= DISPLAY_CLOCK_UPDATE_THRESHOLD
-                ) ?
-                    nextTime
+            setBuffered((buffered) => {
+                return buffered !== nextBuffered &&
+                    (
+                        !isFiniteNumber(buffered) ||
+                        !isFiniteNumber(nextBuffered) ||
+                        Math.abs(buffered - nextBuffered) >= 500
+                    ) ?
+                    nextBuffered
                     :
-                    currentTime;
+                    buffered;
             });
-
-            animationFrame = window.requestAnimationFrame(tick);
         };
+        const interval = window.setInterval(update, 500);
 
-        animationFrame = window.requestAnimationFrame(tick);
+        update();
 
         return () => {
-            if (animationFrame !== null) {
-                window.cancelAnimationFrame(animationFrame);
-            }
+            window.clearInterval(interval);
         };
     }, [containerRef]);
 
-    return [displayTime, syncDisplayTime];
+    return formatTime(buffered);
 };
 
 const formatTime = (time) => {
@@ -168,15 +161,13 @@ const SubtitlePreviewVideo = () => {
     } = usePreviewSubtitles();
     const streamingServer = useStreamingServer();
     const platform = usePlatform();
-    const video = useVideo();
+    const video = useVideo({
+        ignoredObservedProps: ['time', 'buffered', 'buffering']
+    });
     const cueRefs = React.useRef(new Map());
     const [error, setError] = React.useState(null);
     const [subtitlesMenuOpen, setSubtitlesMenuOpen] = React.useState(false);
-    const [displayTime, syncDisplayTime] = usePlaybackDisplayTime({
-        containerRef: video.containerRef,
-        fallbackTime: video.state.time,
-        duration: video.state.duration,
-    });
+    const [activeCueKey, setActiveCueKey] = React.useState(null);
 
     const streamingServerURL = React.useMemo(() => {
         return streamingServer.baseUrl && streamingServer.selected ?
@@ -205,7 +196,7 @@ const SubtitlePreviewVideo = () => {
             time: 0,
             platform: platform.name,
             streamingServerURL,
-            videoCodecs: ['h264'],
+            //videoCodecs: ['h264'],
             maxWidth: 640
         });
     }, [playbackStream, platform.name, streamLoadable, streamingServerURL]);
@@ -254,6 +245,45 @@ const SubtitlePreviewVideo = () => {
             null;
     }, [shiftedSubtitleCues]);
 
+    const readCurrentPlaybackTime = React.useCallback(() => {
+        const videoElementTime = readVideoElementTime(video.containerRef.current);
+
+        return clampDisplayTime(
+            videoElementTime !== null ? videoElementTime : video.state.time,
+            video.state.duration
+        );
+    }, [video.containerRef, video.state.duration, video.state.time]);
+
+    const updateActiveCueKey = React.useCallback((time) => {
+        const cue = getCueAtTime(time);
+        const cueKey = cue !== null && cue.startTime <= time && cue.endTime >= time ?
+            getCueKey(cue)
+            :
+            null;
+
+        setActiveCueKey((activeCueKey) => activeCueKey === cueKey ? activeCueKey : cueKey);
+    }, [getCueAtTime]);
+
+    React.useEffect(() => {
+        if (shiftedSubtitleCues.length === 0) {
+            setActiveCueKey(null);
+            return undefined;
+        }
+
+        const update = () => {
+            const time = readCurrentPlaybackTime();
+
+            updateActiveCueKey(time);
+        };
+        const interval = window.setInterval(update, 500);
+
+        update();
+
+        return () => {
+            window.clearInterval(interval);
+        };
+    }, [readCurrentPlaybackTime, shiftedSubtitleCues.length, updateActiveCueKey]);
+
     const centerCueAtTime = React.useCallback((time) => {
         const cue = getCueAtTime(time);
 
@@ -280,17 +310,19 @@ const SubtitlePreviewVideo = () => {
     }, [video.state.paused]);
 
     const seek = React.useCallback((time) => {
-        syncDisplayTime(time);
         video.setTime(time);
+        updateActiveCueKey(time);
         centerCueAtTime(time);
         window.setTimeout(() => centerCueAtTime(time), 120);
-    }, [centerCueAtTime, syncDisplayTime]);
+    }, [centerCueAtTime, updateActiveCueKey]);
 
     const centerCurrentCue = React.useCallback(() => {
-        if (isFiniteNumber(displayTime)) {
-            centerCueAtTime(displayTime);
+        const currentTime = readCurrentPlaybackTime();
+
+        if (isFiniteNumber(currentTime)) {
+            centerCueAtTime(currentTime);
         }
-    }, [centerCueAtTime, displayTime]);
+    }, [centerCueAtTime, readCurrentPlaybackTime]);
 
     const toggleSubtitlesMenu = React.useCallback(() => {
         setSubtitlesMenuOpen((open) => !open);
@@ -298,6 +330,12 @@ const SubtitlePreviewVideo = () => {
 
     const selectSubtitleFromMenu = React.useCallback((subtitleKey) => {
         selectSubtitle(subtitleKey);
+        setSubtitlesMenuOpen(false);
+    }, [selectSubtitle]);
+
+    const clearSelectedSubtitle = React.useCallback(() => {
+        video.setExtraSubtitlesTrack(null);
+        selectSubtitle(null);
         setSubtitlesMenuOpen(false);
     }, [selectSubtitle]);
 
@@ -309,17 +347,8 @@ const SubtitlePreviewVideo = () => {
         };
     }, [video.events]);
 
-    const buffered = typeof video.state.buffered === 'number' ? video.state.buffered : 0;
     const playbackLabel = video.state.paused === false ? 'Pause' : 'Play';
     const playbackIcon = video.state.paused === false ? 'pause' : 'play';
-    const activeCueKey = React.useMemo(() => {
-        const cue = getCueAtTime(displayTime);
-
-        return cue !== null && cue.startTime <= displayTime && cue.endTime >= displayTime ?
-            getCueKey(cue)
-            :
-            null;
-    }, [displayTime, getCueAtTime]);
     const selectedTrackId = selectedSubtitle !== null ? getSubtitleTrackId(selectedSubtitle) : null;
     const extraSubtitleTrackIds = Array.isArray(video.state.extraSubtitlesTracks) ?
         video.state.extraSubtitlesTracks.map((track) => track.id)
@@ -341,6 +370,16 @@ const SubtitlePreviewVideo = () => {
             <div className={styles['video-panel']}>
                 <div className={styles['video-frame']}>
                     <div className={styles['video-inner']} ref={video.containerRef} />
+                    <Button
+                        className={classnames(styles['icon-button'], styles['subtitles-clear-button'], {
+                            [styles['active']]: selectedSubtitle !== null
+                        })}
+                        title={'Turn off subtitles'}
+                        disabled={selectedSubtitle === null}
+                        onClick={clearSelectedSubtitle}
+                    >
+                        <Icon className={styles['icon']} name={'subtitles'} />
+                    </Button>
                     <div className={styles['video-controls']}>
                         <Button
                             className={classnames(styles['icon-button'], styles['play-button'])}
@@ -352,7 +391,8 @@ const SubtitlePreviewVideo = () => {
                         </Button>
                         <PreciseSeekBar
                             className={styles['video-seek']}
-                            time={displayTime}
+                            containerRef={video.containerRef}
+                            time={video.state.time}
                             duration={video.state.duration}
                             buffered={video.state.buffered}
                             playbackSpeed={video.state.playbackSpeed || 1}
@@ -430,7 +470,15 @@ const SubtitlePreviewVideo = () => {
             <div className={styles['shift-panel']}>
                 <Button
                     className={classnames(styles['shift-button'], styles['shift-button-back'])}
-                    title={'Shift subtitles backward'}
+                    title={'Shift subtitles backward by 1 second'}
+                    disabled={!streamLoadable || selectedSubtitle === null}
+                    onClick={() => shiftSubtitle(-1000)}
+                >
+                    -1s
+                </Button>
+                <Button
+                    className={classnames(styles['shift-button'], styles['shift-button-back-small'])}
+                    title={'Shift subtitles backward by 250 milliseconds'}
                     disabled={!streamLoadable || selectedSubtitle === null}
                     onClick={() => shiftSubtitle(-250)}
                 >
@@ -441,12 +489,20 @@ const SubtitlePreviewVideo = () => {
                     <div className={styles['shift-time']}>{(subtitleDelay / 1000).toFixed(2)}s</div>
                 </div>
                 <Button
-                    className={classnames(styles['shift-button'], styles['shift-button-forward'])}
-                    title={'Shift subtitles forward'}
+                    className={classnames(styles['shift-button'], styles['shift-button-forward-small'])}
+                    title={'Shift subtitles forward by 250 milliseconds'}
                     disabled={!streamLoadable || selectedSubtitle === null}
                     onClick={() => shiftSubtitle(250)}
                 >
                     +250ms
+                </Button>
+                <Button
+                    className={classnames(styles['shift-button'], styles['shift-button-forward'])}
+                    title={'Shift subtitles forward by 1 second'}
+                    disabled={!streamLoadable || selectedSubtitle === null}
+                    onClick={() => shiftSubtitle(1000)}
+                >
+                    +1s
                 </Button>
             </div>
             <div className={styles['cues-panel']}>
@@ -454,7 +510,7 @@ const SubtitlePreviewVideo = () => {
                     <div className={styles['cues-title']}>
                         <div>Subtitle cues</div>
                         <div className={styles['cues-subtitle']}>
-                            {subtitleCuesStatus} - {shiftedSubtitleCues.length} cues - Buffered {formatTime(buffered)}
+                            {subtitleCuesStatus} - {shiftedSubtitleCues.length} cues - Buffered <BufferedTime containerRef={video.containerRef} />
                         </div>
                     </div>
                     <Button

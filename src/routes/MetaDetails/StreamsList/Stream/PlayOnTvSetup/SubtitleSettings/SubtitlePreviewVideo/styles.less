@@ -95,6 +95,22 @@
     grid-area: subtitles;
 }
 
+.subtitles-clear-button {
+    position: absolute;
+    top: 0.7rem;
+    right: 0.7rem;
+    z-index: 2;
+    opacity: 0.55;
+}
+
+.subtitles-clear-button.active {
+    opacity: 1;
+}
+
+.subtitles-clear-button:disabled {
+    opacity: 0.32;
+}
+
 .video-seek {
     --track-size: 0.35rem;
     --thumb-size: 1rem;
@@ -225,8 +241,8 @@
 .shift-panel {
     flex: none;
     display: grid;
-    grid-template-columns: minmax(5rem, auto) minmax(0, 1fr) minmax(5rem, auto);
-    grid-template-areas: 'back value forward';
+    grid-template-columns: minmax(4.5rem, auto) minmax(5rem, auto) minmax(0, 1fr) minmax(5rem, auto) minmax(4.5rem, auto);
+    grid-template-areas: 'back back-small value forward-small forward';
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem;
@@ -244,6 +260,14 @@
 
 .shift-button-back {
     grid-area: back;
+}
+
+.shift-button-back-small {
+    grid-area: back-small;
+}
+
+.shift-button-forward-small {
+    grid-area: forward-small;
 }
 
 .shift-button-forward {
@@ -387,6 +411,11 @@
         height: 2.35rem;
     }
 
+    .subtitles-clear-button {
+        top: 0.55rem;
+        right: 0.55rem;
+    }
+
     .video-seek {
         height: 2rem;
     }
@@ -397,10 +426,10 @@
     }
 
     .shift-panel {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-template-areas:
-            'value value'
-            'back forward';
+            'value value value value'
+            'back back-small forward-small forward';
     }
 
     .cue-row {

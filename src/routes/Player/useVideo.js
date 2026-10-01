@@ -6,9 +6,12 @@ const EventEmitter = require('eventemitter3');
 
 const events = new EventEmitter();
 
-const useVideo = () => {
+const useVideo = (options = {}) => {
     const video = React.useRef(null);
     const containerRef = React.useRef(null);
+    const ignoredObservedProps = React.useMemo(() => {
+        return Array.isArray(options.ignoredObservedProps) ? options.ignoredObservedProps : [];
+    }, [options.ignoredObservedProps]);
 
     const [state, setState] = React.useState({
         manifest: null,
@@ -196,6 +199,10 @@ const useVideo = () => {
     };
 
     const onPropChanged = (name, value) => {
+        if (ignoredObservedProps.includes(name)) {
+            return;
+        }
+
         setState((state) => ({
             ...state,
             [name]: value

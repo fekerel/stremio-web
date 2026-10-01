@@ -78,6 +78,7 @@ const PlayOnTvSetup = ({ stream, streamLink, type, videoId, onCloseRequest }) =>
                         onDevicePickerOpen={openDevicePicker}
                         onMediaInfoOpen={openMediaInfo}
                         onSubtitleSettingsOpen={openSubtitleSettings}
+                        onCancelRequest={onCloseRequest}
                     />
                 );
         }
