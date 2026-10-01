@@ -2,6 +2,7 @@
 
 .subtitle-preview-container {
     box-sizing: border-box;
+    position: relative;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -120,18 +121,33 @@
     height: 2.25rem;
 }
 
+.subtitles-menu-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background-color: rgba(0, 0, 0, 0.58);
+}
+
 .subtitles-menu {
+    flex: none;
     display: flex;
     flex-direction: column;
     gap: 0.55rem;
+    width: min(70%, 56rem);
+    height: min(70%, 36rem);
     min-height: 4rem;
-    max-height: 16rem;
+    max-width: calc(100% - 2rem);
+    max-height: calc(100% - 2rem);
     overflow: hidden;
-    margin: 0.75rem;
+    margin: 0;
     padding: 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: var(--border-radius);
-    background-color: rgba(11, 13, 24, 0.94);
+    background-color: rgba(11, 13, 24, 0.98);
     color: var(--primary-foreground-color);
     box-shadow: 0 0.6rem 1.5rem rgba(0, 0, 0, 0.35);
 }
@@ -139,7 +155,7 @@
 .subtitles-menu-header {
     flex: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto 2.35rem;
     align-items: center;
     gap: 0.75rem;
     min-width: 0;
@@ -164,6 +180,23 @@
     white-space: nowrap;
 }
 
+.subtitles-menu-close-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    padding: 0.55rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.13);
+    color: var(--primary-foreground-color);
+}
+
+.subtitles-menu-close-button:hover,
+.subtitles-menu-close-button:focus {
+    background-color: var(--primary-accent-color);
+}
+
 .menu-error {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -180,8 +213,18 @@
     white-space: nowrap;
 }
 
-.subtitles-options-list {
+.subtitles-selector {
     flex: 1;
+    display: grid;
+    grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+    gap: 0.55rem;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.subtitle-languages-list,
+.subtitles-options-list {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -190,9 +233,50 @@
     overflow-y: auto;
 }
 
+.subtitle-language-option {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.5rem;
+    flex: none;
+    min-width: 0;
+    min-height: 2.35rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: var(--border-radius);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--primary-foreground-color);
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.subtitle-language-option:hover,
+.subtitle-language-option:focus,
+.subtitle-language-option.selected {
+    background-color: var(--primary-accent-color);
+}
+
+.subtitle-language-label,
+.subtitle-language-count {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.subtitle-language-label {
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.subtitle-language-count {
+    color: var(--secondary-accent-color);
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+
 .subtitle-option {
     display: grid;
-    grid-template-columns: minmax(3rem, 4.5rem) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) auto;
     align-items: center;
     gap: 0.5rem;
     flex: none;
@@ -213,8 +297,8 @@
     background-color: var(--primary-accent-color);
 }
 
-.subtitle-option-lang,
 .subtitle-option-label,
+.subtitle-option-url,
 .subtitle-option-meta {
     min-width: 0;
     overflow: hidden;
@@ -222,15 +306,12 @@
     white-space: nowrap;
 }
 
-.subtitle-option-lang {
-    color: var(--secondary-accent-color);
-    font-size: 0.78rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
 .subtitle-option-label {
     font-weight: 700;
+}
+
+.subtitle-option-url {
+    color: var(--color-placeholder);
 }
 
 .subtitle-option-meta {
@@ -420,9 +501,19 @@
         height: 2rem;
     }
 
+    .subtitles-menu-layer {
+        padding: 0.75rem;
+    }
+
     .subtitles-menu {
-        max-height: 13rem;
-        margin: 0.55rem;
+        width: min(100%, 34rem);
+        height: min(75%, 32rem);
+        max-width: calc(100% - 0.5rem);
+        max-height: calc(100% - 0.5rem);
+    }
+
+    .subtitles-selector {
+        grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr);
     }
 
     .shift-panel {

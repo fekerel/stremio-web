@@ -2,6 +2,7 @@
 
 const React = require('react');
 const classnames = require('classnames');
+const FocusLock = require('react-focus-lock').default;
 const { default: Icon } = require('@stremio/stremio-icons/react');
 const { Button } = require('stremio/components');
 const { usePlatform, useStreamingServer } = require('stremio/common');
@@ -14,6 +15,7 @@ const styles = require('./styles');
 const SUBTITLE_TRACK_ID_PREFIX = 'PREVIEW_SUBTITLE_';
 const getSubtitleTrackId = (subtitle) => `${SUBTITLE_TRACK_ID_PREFIX}${subtitle.key}`;
 const getSubtitleLabel = (subtitle) => subtitle.lang ? `${subtitle.lang} - ${subtitle.id}` : subtitle.id;
+const getSubtitleLanguage = (subtitle) => subtitle.lang || 'unknown';
 const getSubtitleOptionLabel = (subtitle, index) => {
     if (typeof subtitle.id === 'string' && subtitle.id.trim().length > 0) {
         return subtitle.id;
@@ -167,6 +169,7 @@ const SubtitlePreviewVideo = () => {
     const cueRefs = React.useRef(new Map());
     const [error, setError] = React.useState(null);
     const [subtitlesMenuOpen, setSubtitlesMenuOpen] = React.useState(false);
+    const [activeSubtitleLanguage, setActiveSubtitleLanguage] = React.useState(null);
     const [activeCueKey, setActiveCueKey] = React.useState(null);
 
     const streamingServerURL = React.useMemo(() => {
@@ -328,6 +331,23 @@ const SubtitlePreviewVideo = () => {
         setSubtitlesMenuOpen((open) => !open);
     }, []);
 
+    const closeSubtitlesMenu = React.useCallback(() => {
+        setSubtitlesMenuOpen(false);
+    }, []);
+
+    const subtitlesMenuOnMouseDown = React.useCallback((event) => {
+        event.stopPropagation();
+    }, []);
+
+    const subtitlesMenuOnKeyDown = React.useCallback((event) => {
+        if (event.code === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            event.nativeEvent.stopImmediatePropagation();
+            closeSubtitlesMenu();
+        }
+    }, [closeSubtitlesMenu]);
+
     const selectSubtitleFromMenu = React.useCallback((subtitleKey) => {
         selectSubtitle(subtitleKey);
         setSubtitlesMenuOpen(false);
@@ -338,6 +358,56 @@ const SubtitlePreviewVideo = () => {
         selectSubtitle(null);
         setSubtitlesMenuOpen(false);
     }, [selectSubtitle]);
+
+    const subtitlesByLanguage = React.useMemo(() => {
+        return availableSubtitles.reduce((subtitlesByLanguage, subtitle) => {
+            const language = getSubtitleLanguage(subtitle);
+
+            if (!subtitlesByLanguage.has(language)) {
+                subtitlesByLanguage.set(language, []);
+            }
+
+            subtitlesByLanguage.get(language).push(subtitle);
+
+            return subtitlesByLanguage;
+        }, new Map());
+    }, [availableSubtitles]);
+
+    const subtitleLanguages = React.useMemo(() => {
+        return Array.from(subtitlesByLanguage.keys());
+    }, [subtitlesByLanguage]);
+
+    const selectedSubtitleLanguage = selectedSubtitle !== null ?
+        getSubtitleLanguage(selectedSubtitle)
+        :
+        null;
+
+    React.useEffect(() => {
+        if (!subtitlesMenuOpen) {
+            return;
+        }
+
+        if (subtitleLanguages.length === 0) {
+            setActiveSubtitleLanguage(null);
+            return;
+        }
+
+        if (activeSubtitleLanguage !== null && subtitleLanguages.includes(activeSubtitleLanguage)) {
+            return;
+        }
+
+        setActiveSubtitleLanguage(
+            selectedSubtitleLanguage !== null && subtitleLanguages.includes(selectedSubtitleLanguage) ?
+                selectedSubtitleLanguage
+                :
+                subtitleLanguages[0]
+        );
+    }, [activeSubtitleLanguage, selectedSubtitleLanguage, subtitleLanguages, subtitlesMenuOpen]);
+
+    const activeLanguageSubtitles = activeSubtitleLanguage !== null ?
+        subtitlesByLanguage.get(activeSubtitleLanguage) || []
+        :
+        [];
 
     React.useEffect(() => {
         video.events.on('error', setError);
@@ -411,58 +481,104 @@ const SubtitlePreviewVideo = () => {
                 </div>
                 {
                     subtitlesMenuOpen ?
-                        <div className={styles['subtitles-menu']}>
-                            <div className={styles['subtitles-menu-header']}>
-                                <div className={styles['subtitles-menu-title']}>External subtitles</div>
-                                <div className={styles['subtitles-menu-status']}>
-                                    {availableSubtitlesStatus} - {availableSubtitles.length} found
+                        <FocusLock
+                            className={styles['subtitles-menu-layer']}
+                            autoFocus={true}
+                            returnFocus={true}
+                            lockProps={{
+                                onMouseDown: closeSubtitlesMenu,
+                                onKeyDown: subtitlesMenuOnKeyDown
+                            }}
+                        >
+                            <div
+                                className={styles['subtitles-menu']}
+                                role={'dialog'}
+                                aria-modal={'true'}
+                                aria-label={'External subtitles'}
+                                onMouseDown={subtitlesMenuOnMouseDown}
+                            >
+                                <div className={styles['subtitles-menu-header']}>
+                                    <div className={styles['subtitles-menu-title']}>External subtitles</div>
+                                    <div className={styles['subtitles-menu-status']}>
+                                        {availableSubtitlesStatus} - {availableSubtitles.length} found
+                                    </div>
+                                    <Button
+                                        className={styles['subtitles-menu-close-button']}
+                                        title={'Close subtitles'}
+                                        onClick={closeSubtitlesMenu}
+                                    >
+                                        <Icon className={styles['icon']} name={'close'} />
+                                    </Button>
                                 </div>
-                            </div>
-                            {
-                                availableSubtitlesStatus === 'loading' ?
-                                    <div className={styles['empty-state']}>Loading subtitles...</div>
-                                    :
-                                    availableSubtitlesError !== null ?
-                                        <div className={styles['menu-error']} title={availableSubtitlesError.message}>
-                                            <span>{availableSubtitlesError.message}</span>
-                                            <Button
-                                                className={styles['retry-button']}
-                                                title={'Retry subtitles'}
-                                                onClick={() => loadAvailableSubtitles().catch(() => null)}
-                                            >
-                                                Retry
-                                            </Button>
-                                        </div>
+                                {
+                                    availableSubtitlesStatus === 'loading' ?
+                                        <div className={styles['empty-state']}>Loading subtitles...</div>
                                         :
-                                        availableSubtitles.length > 0 ?
-                                            <div className={styles['subtitles-options-list']}>
-                                                {
-                                                    availableSubtitles.map((subtitle, index) => {
-                                                        const label = getSubtitleOptionLabel(subtitle, index);
-
-                                                        return (
-                                                            <Button
-                                                                key={subtitle.key}
-                                                                className={classnames(styles['subtitle-option'], {
-                                                                    [styles['selected']]: selectedSubtitleKey === subtitle.key
-                                                                })}
-                                                                title={subtitle.url}
-                                                                onClick={() => selectSubtitleFromMenu(subtitle.key)}
-                                                            >
-                                                                <span className={styles['subtitle-option-lang']}>{subtitle.lang || 'unknown'}</span>
-                                                                <span className={styles['subtitle-option-label']}>{label}</span>
-                                                                <span className={styles['subtitle-option-meta']}>
-                                                                    {selectedSubtitleKey === subtitle.key ? 'Selected' : `#${index + 1}`}
-                                                                </span>
-                                                            </Button>
-                                                        );
-                                                    })
-                                                }
+                                        availableSubtitlesError !== null ?
+                                            <div className={styles['menu-error']} title={availableSubtitlesError.message}>
+                                                <span>{availableSubtitlesError.message}</span>
+                                                <Button
+                                                    className={styles['retry-button']}
+                                                    title={'Retry subtitles'}
+                                                    onClick={() => loadAvailableSubtitles().catch(() => null)}
+                                                >
+                                                    Retry
+                                                </Button>
                                             </div>
                                             :
-                                            <div className={styles['empty-state']}>No external subtitles loaded.</div>
-                            }
-                        </div>
+                                            availableSubtitles.length > 0 ?
+                                                <div className={styles['subtitles-selector']}>
+                                                    <div className={styles['subtitle-languages-list']}>
+                                                        {
+                                                            subtitleLanguages.map((language) => {
+                                                                const languageSubtitles = subtitlesByLanguage.get(language) || [];
+
+                                                                return (
+                                                                    <Button
+                                                                        key={language}
+                                                                        className={classnames(styles['subtitle-language-option'], {
+                                                                            [styles['selected']]: activeSubtitleLanguage === language
+                                                                        })}
+                                                                        title={language}
+                                                                        onClick={() => setActiveSubtitleLanguage(language)}
+                                                                    >
+                                                                        <span className={styles['subtitle-language-label']}>{language}</span>
+                                                                        <span className={styles['subtitle-language-count']}>{languageSubtitles.length}</span>
+                                                                    </Button>
+                                                                );
+                                                            })
+                                                        }
+                                                    </div>
+                                                    <div className={styles['subtitles-options-list']}>
+                                                        {
+                                                            activeLanguageSubtitles.map((subtitle, index) => {
+                                                                const label = getSubtitleOptionLabel(subtitle, index);
+
+                                                                return (
+                                                                    <Button
+                                                                        key={subtitle.key}
+                                                                        className={classnames(styles['subtitle-option'], {
+                                                                            [styles['selected']]: selectedSubtitleKey === subtitle.key
+                                                                        })}
+                                                                        title={subtitle.url}
+                                                                        onClick={() => selectSubtitleFromMenu(subtitle.key)}
+                                                                    >
+                                                                        <span className={styles['subtitle-option-label']}>{label}</span>
+                                                                        <span className={styles['subtitle-option-url']}>{subtitle.url}</span>
+                                                                        <span className={styles['subtitle-option-meta']}>
+                                                                            {selectedSubtitleKey === subtitle.key ? 'Selected' : `#${index + 1}`}
+                                                                        </span>
+                                                                    </Button>
+                                                                );
+                                                            })
+                                                        }
+                                                    </div>
+                                                </div>
+                                                :
+                                                <div className={styles['empty-state']}>No external subtitles loaded.</div>
+                                }
+                            </div>
+                        </FocusLock>
                         :
                         null
                 }
