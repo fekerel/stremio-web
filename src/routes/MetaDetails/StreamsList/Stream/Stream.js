@@ -13,7 +13,10 @@ const { default: useRouteFocused } = require('stremio/common/useRouteFocused');
 const StreamPlaceholder = require('./StreamPlaceholder');
 const styles = require('./styles');
 
-const Stream = ({ className = '', compact = false, isEpg = false, videoId = undefined, videoReleased = undefined, addonName, name, description, thumbnail = undefined, progress, deepLinks, externalPlayerCallbackCanMarkWatched, ...props }) => {
+const TEST_EXTERNAL_PLAYER_PROGRESS_DELAY = 5000;
+const TEST_EXTERNAL_PLAYER_PROGRESS_TIME = 1000;
+
+const Stream = ({ className = '', compact = false, isEpg = false, videoId = undefined, videoReleased = undefined, metaItemPreview = null, addonName, name, description, thumbnail = undefined, progress, deepLinks, externalPlayerCallbackCanMarkWatched, ...props }) => {
     const profile = useProfile();
     const toast = useToast();
     const platform = usePlatform();
@@ -205,6 +208,40 @@ const Stream = ({ className = '', compact = false, isEpg = false, videoId = unde
         }
     }, [streamLink]);
 
+    const dispatchExternalPlayerProgressTest = React.useCallback((event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMenu();
+
+        setTimeout(() => {
+            if (metaItemPreview === null || typeof videoId !== 'string') {
+                toast.show({
+                    type: 'error',
+                    title: 'External progress test skipped',
+                    timeout: 4000
+                });
+                return;
+            }
+
+            core.transport.dispatch({
+                action: 'Ctx',
+                args: {
+                    action: 'UpdateLibraryItemProgress',
+                    args: {
+                        metaItem: metaItemPreview,
+                        videoId,
+                        timeOffset: TEST_EXTERNAL_PLAYER_PROGRESS_TIME
+                    }
+                }
+            });
+            toast.show({
+                type: 'success',
+                title: 'External progress test dispatched',
+                timeout: 4000
+            });
+        }, TEST_EXTERNAL_PLAYER_PROGRESS_DELAY);
+    }, [closeMenu, core, metaItemPreview, toast, videoId]);
+
     const renderThumbnailFallback = React.useCallback(() => (
         <Icon className={styles['placeholder-icon']} name={'ic_broken_link'} />
     ), []);
@@ -282,9 +319,18 @@ const Stream = ({ className = '', compact = false, isEpg = false, videoId = unde
                             <div className={styles['context-menu-option-label']}>{t('CTX_COPY_VIDEO_DOWNLOAD_LINK')}</div>
                         </Button>
                 }
+                {
+                    !isEpg ?
+                        <Button className={styles['context-menu-option-container']} title={'Dispatch external progress test'} onClick={dispatchExternalPlayerProgressTest}>
+                            <Icon className={styles['menu-icon']} name={'play'} />
+                            <div className={styles['context-menu-option-label']}>Dispatch external progress test</div>
+                        </Button>
+                        :
+                        null
+                }
             </div>
         );
-    }, [copyStreamLink, onClick, isEpg, href, target, download]);
+    }, [copyStreamLink, onClick, isEpg, href, target, download, description, streamLink, magnetLink, copyMagnetLink, downloadLink, copyDownloadLink, dispatchExternalPlayerProgressTest]);
 
     React.useEffect(() => {
         if (!routeFocused) {
@@ -316,6 +362,7 @@ Stream.propTypes = {
     isEpg: PropTypes.bool,
     videoId: PropTypes.string,
     videoReleased: PropTypes.instanceOf(Date),
+    metaItemPreview: PropTypes.object,
     addonName: PropTypes.string,
     name: PropTypes.string,
     description: PropTypes.string,

@@ -36,6 +36,22 @@ const MetaDetails = () => {
     }), [type, id, videoId]);
     const metaDetails = useMetaDetails(urlParams);
     const readyMeta = metaDetails.metaItem?.content.type === 'Ready' ? metaDetails.metaItem.content.content : null;
+    const metaItemPreview = React.useMemo(() => readyMeta === null ? null : ({
+        id: readyMeta.id,
+        type: readyMeta.type,
+        name: readyMeta.name,
+        description: readyMeta.description,
+        logo: readyMeta.logo,
+        background: readyMeta.background,
+        poster: readyMeta.poster,
+        posterShape: readyMeta.posterShape,
+        releaseInfo: readyMeta.releaseInfo,
+        runtime: readyMeta.runtime,
+        released: readyMeta.released,
+        trailerStreams: readyMeta.trailerStreams,
+        links: readyMeta.links,
+        behaviorHints: readyMeta.behaviorHints,
+    }), [readyMeta]);
     const isLiveMeta = readyMeta !== null && (readyMeta.behaviorHints?.isLive === true || readyMeta.type === 'tv');
     useExternalPlayerCallback(urlParams, metaDetails);
     const [season, setSeason] = useSeason(urlParams);
@@ -247,6 +263,8 @@ const MetaDetails = () => {
                             className={styles['streams-list']}
                             streams={metaDetails.streams}
                             video={video}
+                            streamVideoId={streamPath.id}
+                            metaItemPreview={metaItemPreview}
                             type={streamPath.type}
                             externalPlayerCallbackCanMarkWatched={externalPlayerCallbackCanMarkWatched}
                             onEpisodeSearch={handleEpisodeSearch}

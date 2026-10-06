@@ -17,7 +17,7 @@ const { default: SeasonEpisodePicker } = require('../EpisodePicker');
 
 const ALL_ADDONS_KEY = 'ALL';
 
-const StreamsList = ({ className, video, type, externalPlayerCallbackCanMarkWatched, onEpisodeSearch, ...props }) => {
+const StreamsList = ({ className, video, streamVideoId, metaItemPreview, type, externalPlayerCallbackCanMarkWatched, onEpisodeSearch, ...props }) => {
     const { t } = useTranslation();
     const core = useCore();
     const platform = usePlatform();
@@ -176,8 +176,9 @@ const StreamsList = ({ className, video, type, externalPlayerCallbackCanMarkWatc
                                     {filteredStreams.map((stream, index) => (
                                         <Stream
                                             key={index}
-                                            videoId={video?.id}
+                                            videoId={video?.id ?? streamVideoId}
                                             videoReleased={video?.released}
+                                            metaItemPreview={metaItemPreview}
                                             addonName={stream.addonName}
                                             name={stream.name}
                                             description={stream.description}
@@ -219,6 +220,8 @@ StreamsList.propTypes = {
     className: PropTypes.string,
     streams: PropTypes.arrayOf(PropTypes.object).isRequired,
     video: PropTypes.object,
+    streamVideoId: PropTypes.string,
+    metaItemPreview: PropTypes.object,
     type: PropTypes.string,
     externalPlayerCallbackCanMarkWatched: PropTypes.bool,
     onEpisodeSearch: PropTypes.func
