@@ -18,14 +18,14 @@ importers:
         specifier: 5.2.0
         version: 5.2.0
       '@stremio/stremio-core-web':
-        specifier: 0.63.1
-        version: 0.63.1
+        specifier: https://github.com/fekerel/stremio-core/releases/download/stremio-core-web-v0.63.1-fork.1/stremio-stremio-core-web-0.63.1-fork.1.tgz
+        version: https://github.com/fekerel/stremio-core/releases/download/stremio-core-web-v0.63.1-fork.1/stremio-stremio-core-web-0.63.1-fork.1.tgz
       '@stremio/stremio-icons':
         specifier: 5.15.0
         version: 5.15.0
       '@stremio/stremio-video':
-        specifier: 0.0.98
-        version: 0.0.98
+        specifier: https://github.com/fekerel/stremio-video/releases/download/v0.0.98-fork.1/stremio-stremio-video-0.0.98-fork.1.tgz
+        version: https://github.com/fekerel/stremio-video/releases/download/v0.0.98-fork.1/stremio-stremio-video-0.0.98-fork.1.tgz
       bowser:
         specifier: 2.14.1
         version: 2.14.1
@@ -1430,14 +1430,16 @@ packages:
   '@stremio/stremio-colors@5.2.0':
     resolution: {integrity: sha512-dYlPgu9W/H7c9s1zmW5tiDnRenaUa4Hg1QCyOg1lhOcgSfM/bVTi5nnqX+IfvGTTUNA0zgzh8hI3o3miwnZxTg==}
 
-  '@stremio/stremio-core-web@0.63.1':
-    resolution: {integrity: sha512-NqrYzoYMSH91ut2a/mM7jYusDywxAW2GD+s2Frin/4hVxakorq72QmrMfZeR0CB/RBkSCOopYDFGNcOgYCey+A==}
+  '@stremio/stremio-core-web@https://github.com/fekerel/stremio-core/releases/download/stremio-core-web-v0.63.1-fork.1/stremio-stremio-core-web-0.63.1-fork.1.tgz':
+    resolution: {integrity: sha512-XGAtvmy1lhemrRXoRBDvcRKwZh+BK6RkeEPotZXc631qAUKGzB2zVZYoU/kECAkbIdQ5Ais22y/vwvocp+Xfbg==, tarball: https://github.com/fekerel/stremio-core/releases/download/stremio-core-web-v0.63.1-fork.1/stremio-stremio-core-web-0.63.1-fork.1.tgz}
+    version: 0.63.1-fork.1
 
   '@stremio/stremio-icons@5.15.0':
     resolution: {integrity: sha512-UaYBgpJBaHZOPLhfZkAIzf99Xy62mxvEKOmeOeNmsSCSc05O05/FXihbA3zKefZBKN6cOy8uWBRGsCrXryV4zg==}
 
-  '@stremio/stremio-video@0.0.98':
-    resolution: {integrity: sha512-1VlitVo7wOxME0q6sm144bJSGM+zu3koy1DGwF6QUzxXY31HWe+PFtmApyk1t8yd9l+DH/6guHPBMBTKdip1KQ==}
+  '@stremio/stremio-video@https://github.com/fekerel/stremio-video/releases/download/v0.0.98-fork.1/stremio-stremio-video-0.0.98-fork.1.tgz':
+    resolution: {integrity: sha512-zp+MBPw0+16OABwRSkgFCymM4dUsHRDS1OaS2OZtmPiV/stVWfdLATliKBICVYr5W4veqHuTQvR99e21bMn+HA==, tarball: https://github.com/fekerel/stremio-video/releases/download/v0.0.98-fork.1/stremio-stremio-video-0.0.98-fork.1.tgz}
+    version: 0.0.98-fork.1
 
   '@stylistic/eslint-plugin-jsx@4.4.1':
     resolution: {integrity: sha512-83SInq4u7z71vWwGG+6ViOtlOmZ6tSrDkMPhrvdBBTGMLA0gs22WSdhQ4vZP3oJ5Xg4ythvqeUiFSedvVxzhyA==}
@@ -6526,13 +6528,13 @@ snapshots:
 
   '@stremio/stremio-colors@5.2.0': {}
 
-  '@stremio/stremio-core-web@0.63.1':
+  '@stremio/stremio-core-web@https://github.com/fekerel/stremio-core/releases/download/stremio-core-web-v0.63.1-fork.1/stremio-stremio-core-web-0.63.1-fork.1.tgz':
     dependencies:
       '@babel/runtime': 7.24.1
 
   '@stremio/stremio-icons@5.15.0': {}
 
-  '@stremio/stremio-video@0.0.98':
+  '@stremio/stremio-video@https://github.com/fekerel/stremio-video/releases/download/v0.0.98-fork.1/stremio-stremio-video-0.0.98-fork.1.tgz':
     dependencies:
       '@stremio/libass-wasm': https://github.com/Stremio/JavascriptSubtitlesOctopus/releases/download/v4.2.6/stremio-libass-wasm-4.2.6.tgz
       buffer: 6.0.3
