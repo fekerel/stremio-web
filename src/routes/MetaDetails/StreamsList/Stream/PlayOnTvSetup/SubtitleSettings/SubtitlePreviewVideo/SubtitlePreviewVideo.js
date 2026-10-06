@@ -199,7 +199,7 @@ const SubtitlePreviewVideo = () => {
             time: 0,
             platform: platform.name,
             streamingServerURL,
-            //videoCodecs: ['h264'],
+            forceTranscodingOnFallback: true,
             maxWidth: 640
         });
     }, [playbackStream, platform.name, streamLoadable, streamingServerURL]);
